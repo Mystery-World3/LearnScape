@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
@@ -12,7 +13,7 @@ import { doc, collectionGroup } from "firebase/firestore";
 import { QuizResult, Question, Class } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export default function ResultsPage() {
+function ResultsContent() {
   const searchParams = useSearchParams();
   const resultId = searchParams.get("resultId");
   const classId = searchParams.get("classId");
@@ -26,7 +27,6 @@ export default function ResultsPage() {
   const classRef = useMemoFirebase(() => classId ? doc(firestore, "classes", classId) : null, [firestore, classId]);
   const { data: classData } = useDoc<Class>(classRef);
 
-  // Ambil semua soal dari semua kelas untuk pencocokan
   const questionsQuery = useMemoFirebase(() => collectionGroup(firestore, "questions"), [firestore]);
   const { data: questions } = useCollection<Question>(questionsQuery);
   
@@ -40,8 +40,8 @@ export default function ResultsPage() {
 
   if (!result) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="text-center p-8 max-w-md">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="text-center p-8 max-w-md w-full">
           <XCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
           <h2 className="text-2xl font-bold">Hasil tidak ditemukan</h2>
           <Button className="mt-6" onClick={() => router.push('/')}>Kembali ke Beranda</Button>
@@ -174,5 +174,18 @@ export default function ResultsPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="mt-4 font-medium text-muted-foreground">Memuat hasil kuis...</p>
+      </div>
+    }>
+      <ResultsContent />
+    </Suspense>
   );
 }
