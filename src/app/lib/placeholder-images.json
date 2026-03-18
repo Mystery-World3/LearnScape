@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-math",
+      "description": "Abstract mathematics concept",
+      "imageUrl": "https://picsum.photos/seed/math1/1200/600",
+      "imageHint": "mathematics geometry"
+    },
+    {
+      "id": "student-learning",
+      "description": "Student studying with tablet",
+      "imageUrl": "https://picsum.photos/seed/learn1/600/400",
+      "imageHint": "student learning"
+    },
+    {
+      "id": "classroom",
+      "description": "Modern bright classroom",
+      "imageUrl": "https://picsum.photos/seed/class1/800/600",
+      "imageHint": "classroom school"
+    }
+  ]
+}

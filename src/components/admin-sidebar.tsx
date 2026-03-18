@@ -1,0 +1,72 @@
+
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { 
+  LayoutDashboard, 
+  BookOpen, 
+  HelpCircle, 
+  Users, 
+  Settings, 
+  LogOut,
+  GraduationCap
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+
+const NAV_ITEMS = [
+  { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
+  { label: "Manajemen Kelas", icon: BookOpen, href: "/admin/classes" },
+  { label: "Manajemen Soal", icon: HelpCircle, href: "/admin/questions" },
+];
+
+export function AdminSidebar() {
+  const pathname = usePathname();
+
+  return (
+    <div className="w-64 h-screen border-r bg-card flex flex-col fixed left-0 top-0 z-50">
+      <div className="p-6">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="bg-primary p-2 rounded-lg">
+            <GraduationCap className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <span className="font-headline font-bold text-xl tracking-tight">LearnScape</span>
+        </Link>
+        <div className="mt-2 px-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">Admin Panel</span>
+        </div>
+      </div>
+
+      <Separator />
+
+      <nav className="flex-1 p-4 space-y-2 mt-4">
+        {NAV_ITEMS.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium",
+              pathname === item.href 
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105" 
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            )}
+          >
+            <item.icon className="h-5 w-5" />
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      <div className="p-4">
+        <Link
+          href="/"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-destructive hover:bg-destructive/10"
+        >
+          <LogOut className="h-5 w-5" />
+          Keluar (View Siswa)
+        </Link>
+      </div>
+    </div>
+  );
+}
