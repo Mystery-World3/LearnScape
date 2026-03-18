@@ -2,32 +2,31 @@
 
 Aplikasi kuis matematika interaktif yang dibangun dengan Next.js, Tailwind CSS, dan Firebase.
 
-## Panduan Deployment ke Vercel
+## Panduan Keamanan & Deployment
 
-Untuk mendeploy aplikasi ini ke Vercel, ikuti langkah-langkah berikut:
+### 1. Keamanan di GitHub
+Kunci API Firebase sekarang dikelola melalui **Environment Variables**. Ini artinya kode Anda aman untuk diunggah ke GitHub karena tidak berisi kunci asli secara langsung.
 
-### 1. Persiapan Firebase
+### 2. Konfigurasi di Vercel
+Saat mendeploy ke Vercel, Anda **WAJIB** menambahkan variabel berikut di menu **Settings > Environment Variables**:
+
+| Key | Value (Ambil dari Firebase Console) |
+|-----|-------|
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | (API Key) |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | (Auth Domain) |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | (Project ID) |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | (App ID) |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | (Storage Bucket) |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | (Messaging Sender ID) |
+
+### 3. Persiapan Database
 1. Buka [Firebase Console](https://console.firebase.google.com/).
 2. Aktifkan **Authentication** (Metode: Anonymous & Password).
-3. Aktifkan **Firestore Database** (Mode: Production atau Test).
-4. Buat koleksi `classes` dan tambahkan beberapa data awal.
-
-### 2. Konfigurasi Environment Variables di Vercel
-Saat melakukan import project ke Vercel, tambahkan variabel berikut di bagian **Environment Variables**:
-
-| Key | Value |
-|-----|-------|
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | (Dari Firebase Project Settings) |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | (Dari Firebase Project Settings) |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | (Dari Firebase Project Settings) |
-| `NEXT_PUBLIC_FIREBASE_APP_ID` | (Dari Firebase Project Settings) |
-| `GOOGLE_GENAI_API_KEY` | (Kunci API Google AI untuk fitur Genkit jika digunakan) |
-
-### 3. Build & Deploy
-Vercel akan secara otomatis mendeteksi Next.js. Anda cukup klik **Deploy**.
+3. Aktifkan **Firestore Database**.
+4. Buat koleksi `teachers` dan tambahkan dokumen dengan ID sesuai UID akun Anda untuk akses admin.
 
 ## Fitur Utama
 - **Manajemen Kelas & Soal**: Guru dapat menambah/hapus materi kuis.
 - **Kuis Interaktif**: Siswa mengerjakan kuis dengan progress bar.
 - **Manajemen Nilai**: Skor disimpan otomatis ke Firestore.
-- **Dashboard Statistik**: Visualisasi data performa siswa dengan Recharts.
+- **Dashboard Statistik**: Visualisasi data performa siswa.
