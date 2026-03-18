@@ -8,12 +8,15 @@ import {
   HelpCircle, 
   LogOut,
   GraduationCap,
-  Trophy
+  Trophy,
+  Sun,
+  Moon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
@@ -26,6 +29,17 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [_, setIsAdminLoggedIn] = useLocalStorage<boolean>("is_admin_logged_in", false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === "light" ? "dark" : "light");
+  };
 
   const handleLogout = () => {
     setIsAdminLoggedIn(false);
@@ -41,8 +55,11 @@ export function AdminSidebar() {
           </div>
           <span className="font-headline font-bold text-xl tracking-tight">LearnScape</span>
         </Link>
-        <div className="mt-2 px-1">
+        <div className="mt-2 px-1 flex justify-between items-center">
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">Admin Panel</span>
+          <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={toggleTheme}>
+             {theme === "light" ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
+          </Button>
         </div>
       </div>
 

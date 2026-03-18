@@ -1,20 +1,21 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Users, Target, BookOpen, TrendingUp, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Users, Target, BookOpen, TrendingUp, Loader2, AlertTriangle, CheckCircle2, Filter } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from "recharts";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, collectionGroup } from "firebase/firestore";
 import { QuizResult, Class } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
   const firestore = useFirestore();
   const [mounted, setMounted] = useState(false);
+  const [filterClassId, setFilterClassId] = useState<string>("all");
 
   useEffect(() => {
     setMounted(true);
@@ -32,33 +33,42 @@ export default function AdminDashboard() {
   const safeResults = useMemo(() => Array.isArray(results) ? results : [], [results]);
   const safeClasses = useMemo(() => Array.isArray(classes) ? classes : [], [classes]);
 
-  const totalParticipants = safeResults.length;
+  const filteredResults = useMemo(() => {
+    if (filterClassId === "all") return safeResults;
+    return safeResults.filter(r => r.classId === filterClassId);
+  }, [safeResults, filterClassId]);
+
+  const totalParticipants = filteredResults.length;
   const avgScore = useMemo(() => {
     if (totalParticipants === 0) return 0;
-    const total = safeResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
+    const total = filteredResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
     return Math.round(total / totalParticipants);
-  }, [safeResults, totalParticipants]);
+  }, [filteredResults, totalParticipants]);
   
   const classStats = useMemo(() => {
     if (!safeClasses.length) return [];
-    return safeClasses.map(c => {
+    const baseStats = safeClasses.map(c => {
       const classResults = safeResults.filter(r => r?.classId === c?.id);
       const totalScore = classResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
       return {
+        id: c.id,
         name: c?.name || "Materi",
         count: classResults.length,
         avg: classResults.length ? Math.round(totalScore / classResults.length) : 0
       };
     });
-  }, [safeClasses, safeResults]);
+
+    if (filterClassId === "all") return baseStats;
+    return baseStats.filter(s => s.id === filterClassId);
+  }, [safeClasses, safeResults, filterClassId]);
 
   const sortedRecentResults = useMemo(() => {
-    if (!safeResults.length) return [];
-    return [...safeResults]
+    if (!filteredResults.length) return [];
+    return [...filteredResults]
       .filter(r => r && r.timestamp)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 5);
-  }, [safeResults]);
+  }, [filteredResults]);
 
   const COLORS = ['#3b49df', '#facc15', '#10b981', '#f43f5e', '#8b5cf6'];
 
@@ -73,14 +83,32 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="space-y-1">
           <h1 className="text-4xl font-headline font-bold">Ringkasan Statistik</h1>
-          <p className="text-muted-foreground">Monitor performa siswa dan aktivitas kuis secara real-time.</p>
+          <p className="text-muted-foreground">Monitor performa siswa secara real-time.</p>
         </div>
-        <div className="bg-primary/10 px-4 py-2 rounded-full border border-primary/20 flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-sm font-bold text-primary">Sistem Online</span>
+        
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+          <div className="flex items-center gap-2 bg-card p-2 rounded-xl border shadow-sm w-full sm:w-auto">
+            <Filter className="h-4 w-4 text-muted-foreground ml-2" />
+            <Select value={filterClassId} onValueChange={setFilterClassId}>
+              <SelectTrigger className="w-[180px] border-none shadow-none focus:ring-0">
+                <SelectValue placeholder="Semua Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Kelas</SelectItem>
+                {safeClasses.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="bg-primary/10 px-4 py-2 rounded-full border border-primary/20 flex items-center gap-2 shrink-0">
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-sm font-bold text-primary">Sistem Online</span>
+          </div>
         </div>
       </div>
 
@@ -88,14 +116,8 @@ export default function AdminDashboard() {
         <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive border-l-4">
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle className="font-bold">Konfigurasi Database Diperlukan</AlertTitle>
-          <AlertDescription className="space-y-2">
-            <p>
-              {classesError?.message.includes("index") || resultsError?.message.includes("index") 
-                ? "Firebase membutuhkan Index untuk menampilkan statistik. Silakan cek konsol browser (F12) untuk link pembuatan index otomatis."
-                : (classesError?.message.includes("permission") || resultsError?.message.includes("permission"))
-                ? "Izin akses ditolak. Pastikan 'Firestore Security Rules' Anda sudah diperbarui untuk mendukung 'collectionGroup'."
-                : "Terjadi kendala saat memuat data. Pastikan koneksi internet stabil."}
-            </p>
+          <AlertDescription>
+            Terjadi kendala saat memuat data. Periksa koneksi atau index Firebase Anda.
           </AlertDescription>
         </Alert>
       )}
@@ -107,7 +129,7 @@ export default function AdminDashboard() {
           </div>
           <CardHeader className="pb-2 relative z-10">
             <CardTitle className="text-5xl font-headline">{totalParticipants}</CardTitle>
-            <CardDescription className="text-primary-foreground font-bold opacity-80">Total Peserta</CardDescription>
+            <CardDescription className="text-primary-foreground font-bold opacity-80">Peserta Terfilter</CardDescription>
           </CardHeader>
         </Card>
 
@@ -123,7 +145,9 @@ export default function AdminDashboard() {
 
         <Card className="border shadow-xl bg-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-5xl font-headline text-primary">{safeClasses.length}</CardTitle>
+            <CardTitle className="text-5xl font-headline text-primary">
+              {filterClassId === "all" ? safeClasses.length : 1}
+            </CardTitle>
             <CardDescription className="font-bold text-muted-foreground">Materi Aktif</CardDescription>
           </CardHeader>
         </Card>
@@ -134,8 +158,8 @@ export default function AdminDashboard() {
                <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
                <span className="text-xs font-bold text-green-500 uppercase">Live</span>
             </div>
-            <CardTitle className="text-3xl font-headline">Aktif</CardTitle>
-            <CardDescription className="font-bold text-muted-foreground">Status Sinkron</CardDescription>
+            <CardTitle className="text-3xl font-headline">Sinkron</CardTitle>
+            <CardDescription className="font-bold text-muted-foreground">Status Database</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -145,33 +169,16 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="font-headline text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Skor Rata-rata per Kelas (%)
+              Performa Nilai (%)
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px] w-full pt-4">
              {classStats.length > 0 ? (
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={classStats}>
-                    <XAxis 
-                      dataKey="name" 
-                      fontSize={10} 
-                      tickLine={false} 
-                      axisLine={false} 
-                      stroke="currentColor" 
-                      opacity={0.5}
-                    />
-                    <YAxis 
-                      fontSize={12} 
-                      tickLine={false} 
-                      axisLine={false} 
-                      domain={[0, 100]} 
-                      stroke="currentColor" 
-                      opacity={0.5}
-                    />
-                    <Tooltip 
-                      cursor={{fill: 'rgba(0,0,0,0.05)'}} 
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
-                    />
+                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
+                    <Tooltip cursor={{fill: 'rgba(0,0,0,0.05)'}} />
                     <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                       {classStats.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -189,7 +196,7 @@ export default function AdminDashboard() {
 
         <Card className="shadow-2xl bg-card border">
           <CardHeader>
-            <CardTitle className="font-headline text-lg">Distribusi Peserta per Kelas</CardTitle>
+            <CardTitle className="font-headline text-lg">Distribusi Peserta</CardTitle>
           </CardHeader>
           <CardContent className="h-[300px] w-full pt-4">
              {classStats.some(s => s.count > 0) ? (
@@ -205,15 +212,12 @@ export default function AdminDashboard() {
                       label={({ name }) => name}
                       stroke="hsl(var(--card))"
                       strokeWidth={2}
-                      fontSize={10}
                     >
                       {classStats.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))' }}
-                    />
+                    <Tooltip />
                   </PieChart>
                </ResponsiveContainer>
              ) : (
@@ -231,7 +235,7 @@ export default function AdminDashboard() {
             <CheckCircle2 className="h-5 w-5 text-green-500" />
             Aktivitas Terakhir
           </CardTitle>
-          <CardDescription>Daftar 5 siswa yang baru saja menyelesaikan kuis</CardDescription>
+          <CardDescription>Siswa yang baru saja menyelesaikan kuis dalam filter ini</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
