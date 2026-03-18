@@ -1,8 +1,9 @@
-
 export type Class = {
   id: string;
   name: string;
   description?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type Question = {
@@ -12,6 +13,8 @@ export type Question = {
   options: string[];
   correctAnswerIndex: number;
   solutionSteps: string[];
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type QuizResult = {

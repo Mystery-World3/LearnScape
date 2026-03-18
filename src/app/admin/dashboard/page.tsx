@@ -1,32 +1,48 @@
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Users, Target, BookOpen, Clock, TrendingUp } from "lucide-react";
+import { Users, Target, BookOpen, Clock, TrendingUp, Loader2 } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection, collectionGroup } from "firebase/firestore";
 import { QuizResult, Class } from "@/lib/types";
-import { MOCK_RESULTS, MOCK_CLASSES } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
-  const [results] = useLocalStorage<QuizResult[]>("quiz_results", MOCK_RESULTS);
-  const [classes] = useLocalStorage<Class[]>("classes", MOCK_CLASSES);
-
-  const totalParticipants = results.length;
-  const avgScore = results.length ? Math.round(results.reduce((acc, curr) => acc + curr.score, 0) / results.length) : 0;
+  const firestore = useFirestore();
   
-  const classStats = classes.map(c => {
-    const classResults = results.filter(r => r.classId === c.id);
+  const classesQuery = useMemoFirebase(() => collection(firestore, "classes"), [firestore]);
+  const { data: classes, isLoading: classesLoading } = useCollection<Class>(classesQuery);
+
+  const resultsQuery = useMemoFirebase(() => collectionGroup(firestore, "quizAttempts"), [firestore]);
+  const { data: results, isLoading: resultsLoading } = useCollection<QuizResult>(resultsQuery);
+
+  const isLoading = classesLoading || resultsLoading;
+
+  const totalParticipants = results?.length || 0;
+  const avgScore = results?.length ? Math.round(results.reduce((acc, curr) => acc + curr.score, 0) / results.length) : 0;
+  
+  const classStats = classes?.map(c => {
+    const classResults = results?.filter(r => r.classId === c.id) || [];
     return {
       name: c.name,
       count: classResults.length,
       avg: classResults.length ? Math.round(classResults.reduce((acc, curr) => acc + curr.score, 0) / classResults.length) : 0
     };
-  });
+  }) || [];
 
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[80vh] text-muted-foreground">
+        <Loader2 className="h-10 w-10 animate-spin mb-4" />
+        <p className="font-medium">Memuat data statistik...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -37,7 +53,7 @@ export default function AdminDashboard() {
         </div>
         <div className="bg-primary/10 px-4 py-2 rounded-full border border-primary/20 flex items-center gap-2">
           <Clock className="h-4 w-4 text-primary" />
-          <span className="text-sm font-bold text-primary">Update: Hari Ini, {new Date().toLocaleTimeString()}</span>
+          <span className="text-sm font-bold text-primary">Update: Real-time</span>
         </div>
       </div>
 
@@ -54,14 +70,14 @@ export default function AdminDashboard() {
           <CardHeader className="pb-2">
             <Target className="h-8 w-8 opacity-50 mb-2" />
             <CardTitle className="text-4xl font-headline">{avgScore}%</CardTitle>
-            <CardDescription className="text-accent-foreground/70 font-medium">Rata-rata Skor Nasional</CardDescription>
+            <CardDescription className="text-accent-foreground/70 font-medium">Rata-rata Skor</CardDescription>
           </CardHeader>
         </Card>
 
         <Card className="border-none shadow-xl bg-white dark:bg-card">
           <CardHeader className="pb-2">
             <BookOpen className="h-8 w-8 text-primary opacity-50 mb-2" />
-            <CardTitle className="text-4xl font-headline text-foreground">{classes.length}</CardTitle>
+            <CardTitle className="text-4xl font-headline text-foreground">{classes?.length || 0}</CardTitle>
             <CardDescription className="font-medium">Kelas Aktif</CardDescription>
           </CardHeader>
         </Card>
@@ -69,8 +85,8 @@ export default function AdminDashboard() {
         <Card className="border-none shadow-xl bg-white dark:bg-card">
           <CardHeader className="pb-2">
             <TrendingUp className="h-8 w-8 text-accent opacity-50 mb-2" />
-            <CardTitle className="text-4xl font-headline text-foreground">+12%</CardTitle>
-            <CardDescription className="font-medium">Pertumbuhan Minggu Ini</CardDescription>
+            <CardTitle className="text-4xl font-headline text-foreground">Active</CardTitle>
+            <CardDescription className="font-medium">Status Database</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -84,7 +100,7 @@ export default function AdminDashboard() {
           <CardContent className="h-[300px]">
              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={classStats}>
-                  <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}%`} />
                   <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                     {classStats.map((entry, index) => (
@@ -110,8 +126,9 @@ export default function AdminDashboard() {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    label
+                    outerRadius={80}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    fontSize={10}
                   >
                     {classStats.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -130,7 +147,7 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {results.slice(-5).reverse().map((r, i) => (
+            {results?.slice(-5).reverse().map((r, i) => (
               <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/40 border">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
@@ -139,7 +156,7 @@ export default function AdminDashboard() {
                   <div>
                     <div className="font-bold">{r.studentName || "Siswa Tanpa Nama"}</div>
                     <div className="text-xs text-muted-foreground">
-                      {classes.find(c => c.id === r.classId)?.name} • {new Date(r.timestamp).toLocaleDateString()}
+                      {classes?.find(c => c.id === r.classId)?.name} • {new Date(r.timestamp).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
@@ -150,6 +167,11 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+            {(!results || results.length === 0) && (
+              <div className="text-center py-8 text-muted-foreground">
+                Belum ada aktivitas kuis.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

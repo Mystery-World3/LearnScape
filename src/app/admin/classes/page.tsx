@@ -1,48 +1,53 @@
-
 "use client";
 
 import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Edit2, Trash2, Search, BookOpen } from "lucide-react";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { Plus, Edit2, Trash2, Search, BookOpen, Loader2 } from "lucide-react";
+import { useFirestore, useCollection, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import { Class } from "@/lib/types";
-import { MOCK_CLASSES } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export default function ClassManagement() {
-  const [classes, setClasses] = useLocalStorage<Class[]>("classes", MOCK_CLASSES);
+  const firestore = useFirestore();
+  const classesQuery = useMemoFirebase(() => collection(firestore, "classes"), [firestore]);
+  const { data: classes, isLoading } = useCollection<Class>(classesQuery);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
 
-  const filteredClasses = classes.filter(c => 
+  const filteredClasses = classes?.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) || [];
 
   const handleSave = () => {
-    if (editingClass) {
-      setClasses(classes.map(c => c.id === editingClass.id ? { ...editingClass, ...formData } : c));
-    } else {
-      const newClass: Class = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: formData.name,
-        description: formData.description
-      };
-      setClasses([...classes, newClass]);
-    }
+    const classId = editingClass?.id || Math.random().toString(36).substr(2, 9);
+    const docRef = doc(firestore, "classes", classId);
+    
+    setDocumentNonBlocking(docRef, {
+      id: classId,
+      name: formData.name,
+      description: formData.description,
+      createdAt: editingClass?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
     setIsOpen(false);
     setEditingClass(null);
     setFormData({ name: "", description: "" });
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus kelas ini? Semua soal terkait juga akan terpengaruh.")) {
-      setClasses(classes.filter(c => c.id !== id));
+    if (confirm("Apakah Anda yakin ingin menghapus kelas ini?")) {
+      const docRef = doc(firestore, "classes", id);
+      deleteDocumentNonBlocking(docRef);
     }
   };
 
@@ -85,7 +90,7 @@ export default function ClassManagement() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsOpen(false)}>Batal</Button>
-              <Button onClick={handleSave}>Simpan Perubahan</Button>
+              <Button onClick={handleSave} disabled={!formData.name}>Simpan Perubahan</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -104,46 +109,53 @@ export default function ClassManagement() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nama Kelas</TableHead>
-                <TableHead>Deskripsi</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredClasses.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-bold text-primary flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 opacity-50" /> {c.name}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{c.description || "-"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        setEditingClass(c);
-                        setFormData({ name: c.name, description: c.description || "" });
-                        setIsOpen(true);
-                      }}>
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(c.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredClasses.length === 0 && (
+          {isLoading ? (
+            <div className="flex flex-col items-center py-12 text-muted-foreground">
+              <Loader2 className="h-8 w-8 animate-spin mb-2" />
+              Memuat data kelas...
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-12 text-muted-foreground">
-                    Tidak ada kelas ditemukan.
-                  </TableCell>
+                  <TableHead>Nama Kelas</TableHead>
+                  <TableHead>Deskripsi</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredClasses.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-bold text-primary flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 opacity-50" /> {c.name}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{c.description || "-"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setEditingClass(c);
+                          setFormData({ name: c.name, description: c.description || "" });
+                          setIsOpen(true);
+                        }}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(c.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredClasses.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-12 text-muted-foreground">
+                      Tidak ada kelas ditemukan.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

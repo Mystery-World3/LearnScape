@@ -6,23 +6,38 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, XCircle, Home, RotateCcw, Award, Lightbulb } from "lucide-react";
-import { MOCK_QUESTIONS, MOCK_CLASSES } from "@/lib/mock-data";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { QuizResult, Question } from "@/lib/types";
-import { useMemo } from "react";
+import { CheckCircle2, XCircle, Home, RotateCcw, Award, Lightbulb, Loader2 } from "lucide-react";
+import { useFirestore, useDoc, useMemoFirebase, useCollection } from "@/firebase";
+import { doc, collectionGroup } from "firebase/firestore";
+import { QuizResult, Question, Class } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function ResultsPage() {
   const searchParams = useSearchParams();
   const resultId = searchParams.get("resultId");
+  const classId = searchParams.get("classId");
   const router = useRouter();
-  const [results] = useLocalStorage<QuizResult[]>("quiz_results", []);
-  const [questions] = useLocalStorage<Question[]>("questions", MOCK_QUESTIONS);
-  const [classes] = useLocalStorage("classes", MOCK_CLASSES);
-
-  const result = useMemo(() => results.find(r => r.id === resultId), [results, resultId]);
   
+  const firestore = useFirestore();
+
+  const resultRef = useMemoFirebase(() => (resultId && classId) ? doc(firestore, "classes", classId, "quizAttempts", resultId) : null, [firestore, resultId, classId]);
+  const { data: result, isLoading: resultLoading } = useDoc<QuizResult>(resultRef);
+
+  const classRef = useMemoFirebase(() => classId ? doc(firestore, "classes", classId) : null, [firestore, classId]);
+  const { data: classData } = useDoc<Class>(classRef);
+
+  // Ambil semua soal dari semua kelas untuk pencocokan
+  const questionsQuery = useMemoFirebase(() => collectionGroup(firestore, "questions"), [firestore]);
+  const { data: questions } = useCollection<Question>(questionsQuery);
+  
+  if (resultLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!result) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -35,8 +50,6 @@ export default function ResultsPage() {
     );
   }
 
-  const resultClass = classes.find(c => c.id === result.classId);
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -47,7 +60,7 @@ export default function ResultsPage() {
              <Award className="h-24 w-24 text-primary relative z-10 mx-auto" />
           </div>
           <h1 className="text-4xl font-headline font-bold">Luar Biasa, {result.studentName}!</h1>
-          <p className="text-muted-foreground text-lg">Kamu telah menyelesaikan kuis <b>{resultClass?.name}</b></p>
+          <p className="text-muted-foreground text-lg">Kamu telah menyelesaikan kuis <b>{classData?.name}</b></p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -100,7 +113,7 @@ export default function ResultsPage() {
           </h2>
           <div className="space-y-4">
             {result.answers.map((answer, idx) => {
-              const question = questions.find(q => q.id === answer.questionId);
+              const question = questions?.find(q => q.id === answer.questionId);
               if (!question) return null;
 
               return (

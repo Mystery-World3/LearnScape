@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -10,22 +9,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, ArrowRight, User } from "lucide-react";
-import { MOCK_CLASSES } from "@/lib/mock-data";
+import { GraduationCap, ArrowRight, User, Loader2 } from "lucide-react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { Class } from "@/lib/types";
 
 export default function LandingPage() {
   const router = useRouter();
+  const firestore = useFirestore();
+  
+  const classesQuery = useMemoFirebase(() => collection(firestore, "classes"), [firestore]);
+  const { data: classes, isLoading } = useCollection<Class>(classesQuery);
+
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [studentName, setStudentName] = useLocalStorage<string>("student_name", "");
   const [tempName, setTempName] = useState("");
   const [isNameDialogOpen, setIsNameDialogOpen] = useState(false);
-  const [classes] = useLocalStorage("classes", MOCK_CLASSES);
 
   const handleStartQuiz = () => {
     if (!selectedClass) return;
     
     if (!studentName) {
+      setTempName("");
       setIsNameDialogOpen(true);
     } else {
       router.push(`/quiz/${selectedClass}`);
@@ -63,26 +69,31 @@ export default function LandingPage() {
               </div>
 
               <div className="space-y-4">
-                <Select onValueChange={setSelectedClass} value={selectedClass}>
+                <Select onValueChange={setSelectedClass} value={selectedClass} disabled={isLoading}>
                   <SelectTrigger className="h-14 bg-[#eef0f7] dark:bg-secondary border-none rounded-xl text-base px-6">
-                    <SelectValue placeholder="Pilih jenjang kelas..." />
+                    <SelectValue placeholder={isLoading ? "Memuat kelas..." : "Pilih jenjang kelas..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {classes.map((c: any) => (
+                    {classes?.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
                     ))}
+                    {classes?.length === 0 && !isLoading && (
+                      <div className="p-4 text-sm text-muted-foreground text-center">
+                        Belum ada kelas tersedia.
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
 
                 <Button 
                   className="w-full h-14 text-lg font-bold gap-2 rounded-xl bg-[#98a3e0] hover:bg-[#3b49df] text-white transition-all group"
-                  disabled={!selectedClass}
+                  disabled={!selectedClass || isLoading}
                   onClick={handleStartQuiz}
                 >
-                  Mulai Belajar
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "Mulai Belajar"}
+                  {!isLoading && <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />}
                 </Button>
                 
                 {studentName && (
@@ -119,6 +130,7 @@ export default function LandingPage() {
                   placeholder="Contoh: Budi Santoso"
                   className="h-12"
                   autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveNameAndStart()}
                 />
               </div>
             </div>
