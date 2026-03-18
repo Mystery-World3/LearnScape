@@ -43,10 +43,12 @@ export default function QuestionManagement() {
     solutionSteps: [""]
   });
 
-  const filteredQuestions = questions?.filter(q => 
-    q.statement.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    classes?.find(c => c.id === q.classId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredQuestions = questions?.filter(q => {
+    const statement = q.statement || "";
+    const className = classes?.find(c => c.id === q.classId)?.name || "";
+    const search = searchTerm.toLowerCase();
+    return statement.toLowerCase().includes(search) || className.toLowerCase().includes(search);
+  }) || [];
 
   const handleSave = () => {
     if (!formData.classId) return;
@@ -75,21 +77,37 @@ export default function QuestionManagement() {
       parsed.forEach((q: any) => {
         const questionId = Math.random().toString(36).substr(2, 9);
         const docRef = doc(firestore, "classes", bulkClassId, "questions", questionId);
-        setDocumentNonBlocking(docRef, {
-          ...q,
+        
+        // Mapping fields from user JSON to app schema
+        const mappedType: QuestionType = q.type === 'short-answer' ? 'text' : (q.type || 'multiple-choice');
+        const statement = q.statement || q.text || "";
+        const solutionSteps = Array.isArray(q.solutionSteps) ? q.solutionSteps : (q.explanation ? [q.explanation] : []);
+        
+        const finalData: any = {
           id: questionId,
           classId: bulkClassId,
-          type: q.type || 'multiple-choice',
+          type: mappedType,
+          statement: statement,
+          solutionSteps: solutionSteps,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        }, { merge: true });
+        };
+
+        if (mappedType === 'multiple-choice') {
+          finalData.options = q.options || ["", "", "", ""];
+          finalData.correctAnswerIndex = typeof q.correctAnswer === 'number' ? q.correctAnswer : (q.correctAnswerIndex || 0);
+        } else {
+          finalData.correctAnswer = q.correctAnswer?.toString() || "";
+        }
+
+        setDocumentNonBlocking(docRef, finalData, { merge: true });
       });
 
       toast({ title: "Berhasil!", description: `${parsed.length} soal telah diimpor.` });
       setIsBulkOpen(false);
       setBulkData("");
     } catch (e: any) {
-      toast({ title: "Gagal Impor", description: e.message, variant: "destructive" });
+      toast({ title: "Gagal Impor", description: "Pastikan format JSON benar. Error: " + e.message, variant: "destructive" });
     }
   };
 
@@ -137,7 +155,7 @@ export default function QuestionManagement() {
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Impor Masal Soal (JSON)</DialogTitle>
-                <DialogDescription>Masukkan kode JSON berisi array soal untuk diimpor sekaligus.</DialogDescription>
+                <DialogDescription>Sistem kini mendukung format dengan properti "text" atau "statement".</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -154,7 +172,7 @@ export default function QuestionManagement() {
                   <Textarea 
                     value={bulkData} 
                     onChange={(e) => setBulkData(e.target.value)} 
-                    placeholder='[{"statement": "...", "type": "multiple-choice", "options": ["A", "B", ...], "correctAnswerIndex": 0, "solutionSteps": ["..."]}]'
+                    placeholder='[{"text": "Soal...", "type": "multiple-choice", "options": ["A", "B"], "correctAnswer": 0}]'
                     className="font-mono text-xs h-64"
                   />
                 </div>
@@ -270,7 +288,7 @@ export default function QuestionManagement() {
                     <Badge variant="outline">{classes?.find(c => c.id === q.classId)?.name}</Badge>
                     <Badge className="gap-1">
                       {q.type === 'multiple-choice' ? <List className="h-3 w-3" /> : q.type === 'number' ? <Hash className="h-3 w-3" /> : <Type className="h-3 w-3" />}
-                      <span className="capitalize">{q.type?.replace('-', ' ')}</span>
+                      <span className="capitalize">{(q.type || 'multiple-choice').replace('-', ' ')}</span>
                     </Badge>
                   </div>
                   <div className="flex gap-1">
@@ -278,7 +296,7 @@ export default function QuestionManagement() {
                     <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(q)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>
-                <CardTitle className="text-lg font-headline mt-2">{q.statement}</CardTitle>
+                <CardTitle className="text-lg font-headline mt-2">{q.statement || "Soal tanpa teks"}</CardTitle>
               </CardHeader>
               <CardContent>
                  {q.type === 'multiple-choice' ? (
