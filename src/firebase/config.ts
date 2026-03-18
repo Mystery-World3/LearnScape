@@ -4,5 +4,5 @@ export const firebaseConfig = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "studio-6468065292-dc3aa",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "studio-6468065292-dc3aa.firebasestorage.app",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "647694388184",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:647694388184:web:da001ad7f5b9df998680ad"
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:647694388184:web:8e2935f521a232668680ad"
 };
