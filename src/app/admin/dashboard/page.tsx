@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Users, Target, BookOpen, Clock, TrendingUp, Loader2 } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -26,30 +25,38 @@ export default function AdminDashboard() {
   const resultsQuery = useMemoFirebase(() => collectionGroup(firestore, "quizAttempts"), [firestore]);
   const { data: results, isLoading: resultsLoading } = useCollection<QuizResult>(resultsQuery);
 
-  const isLoading = classesLoading || resultsLoading;
+  const isLoading = !mounted || classesLoading || resultsLoading;
 
-  // Safe data extraction
-  const safeResults = results || [];
-  const safeClasses = classes || [];
+  const safeResults = useMemo(() => results || [], [results]);
+  const safeClasses = useMemo(() => classes || [], [classes]);
 
   const totalParticipants = safeResults.length;
-  const avgScore = totalParticipants 
-    ? Math.round(safeResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / totalParticipants) 
-    : 0;
+  const avgScore = useMemo(() => {
+    if (totalParticipants === 0) return 0;
+    return Math.round(safeResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / totalParticipants);
+  }, [safeResults, totalParticipants]);
   
-  const classStats = safeClasses.map(c => {
-    const classResults = safeResults.filter(r => r.classId === c.id);
-    return {
-      name: c.name,
-      count: classResults.length,
-      avg: classResults.length ? Math.round(classResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / classResults.length) : 0
-    };
-  });
+  const classStats = useMemo(() => {
+    return safeClasses.map(c => {
+      const classResults = safeResults.filter(r => r.classId === c.id);
+      return {
+        name: c.name,
+        count: classResults.length,
+        avg: classResults.length ? Math.round(classResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / classResults.length) : 0
+      };
+    });
+  }, [safeClasses, safeResults]);
+
+  const sortedRecentResults = useMemo(() => {
+    return [...safeResults]
+      .filter(r => r && r.timestamp && !isNaN(new Date(r.timestamp).getTime()))
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 5);
+  }, [safeResults]);
 
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
 
-  // Prevent hydration mismatch for charts and dates
-  if (!mounted || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] text-muted-foreground">
         <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" />
@@ -149,7 +156,7 @@ export default function AdminDashboard() {
                       cy="50%"
                       outerRadius={80}
                       label={({ name, percent }) => {
-                        const pct = typeof percent === 'number' ? (percent * 100).toFixed(0) : '0';
+                        const pct = (typeof percent === 'number' && !isNaN(percent)) ? (percent * 100).toFixed(0) : '0';
                         return `${name} ${pct}%`;
                       }}
                       fontSize={10}
@@ -176,11 +183,7 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {safeResults
-              .filter(r => !!r.timestamp)
-              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-              .slice(0, 5)
-              .map((r, i) => (
+            {sortedRecentResults.map((r, i) => (
               <div key={r.id || i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/40 border">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0">
@@ -200,7 +203,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
-            {safeResults.length === 0 && (
+            {sortedRecentResults.length === 0 && (
               <div className="text-center py-12 text-muted-foreground italic bg-secondary/20 rounded-2xl border border-dashed">
                 Belum ada aktivitas kuis yang tercatat.
               </div>
