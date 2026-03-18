@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Users, Target, BookOpen, Clock, TrendingUp, Loader2, AlertTriangle } from "lucide-react";
+import { Users, Target, BookOpen, TrendingUp, Loader2, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from "recharts";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, collectionGroup } from "firebase/firestore";
@@ -106,23 +106,23 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-none shadow-xl bg-primary text-primary-foreground">
           <CardHeader className="pb-2">
-            <Users className="h-8 w-8 opacity-40 mb-2" />
+            <Users className="h-8 w-8 opacity-60 mb-2" />
             <CardTitle className="text-4xl font-headline">{totalParticipants}</CardTitle>
-            <CardDescription className="text-primary-foreground/70 font-medium">Total Peserta</CardDescription>
+            <CardDescription className="text-primary-foreground/80 font-medium">Total Peserta</CardDescription>
           </CardHeader>
         </Card>
 
         <Card className="border-none shadow-xl bg-accent text-accent-foreground">
           <CardHeader className="pb-2">
-            <Target className="h-8 w-8 opacity-40 mb-2" />
+            <Target className="h-8 w-8 opacity-60 mb-2" />
             <CardTitle className="text-4xl font-headline">{avgScore}%</CardTitle>
-            <CardDescription className="text-accent-foreground/70 font-medium">Rata-rata Skor</CardDescription>
+            <CardDescription className="text-accent-foreground/80 font-medium">Rata-rata Skor</CardDescription>
           </CardHeader>
         </Card>
 
         <Card className="border-none shadow-xl bg-card">
           <CardHeader className="pb-2">
-            <BookOpen className="h-8 w-8 text-primary opacity-40 mb-2" />
+            <BookOpen className="h-8 w-8 text-primary opacity-60 mb-2" />
             <CardTitle className="text-4xl font-headline">{safeClasses.length}</CardTitle>
             <CardDescription className="font-medium text-muted-foreground">Materi Aktif</CardDescription>
           </CardHeader>
@@ -130,7 +130,7 @@ export default function AdminDashboard() {
 
         <Card className="border-none shadow-xl bg-card">
           <CardHeader className="pb-2">
-            <TrendingUp className="h-8 w-8 text-accent opacity-40 mb-2" />
+            <TrendingUp className="h-8 w-8 text-accent opacity-60 mb-2" />
             <CardTitle className="text-4xl font-headline">Live</CardTitle>
             <CardDescription className="font-medium text-muted-foreground">Koneksi Database</CardDescription>
           </CardHeader>
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="shadow-xl">
+        <Card className="shadow-xl bg-card border-none">
           <CardHeader>
             <CardTitle className="font-headline text-lg">Skor Rata-rata per Kelas (%)</CardTitle>
           </CardHeader>
@@ -146,9 +146,26 @@ export default function AdminDashboard() {
              {classStats.length > 0 ? (
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={classStats}>
-                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
-                    <Tooltip cursor={{fill: 'transparent'}} />
+                    <XAxis 
+                      dataKey="name" 
+                      fontSize={10} 
+                      tickLine={false} 
+                      axisLine={false} 
+                      stroke="currentColor" 
+                      opacity={0.5}
+                    />
+                    <YAxis 
+                      fontSize={12} 
+                      tickLine={false} 
+                      axisLine={false} 
+                      domain={[0, 100]} 
+                      stroke="currentColor" 
+                      opacity={0.5}
+                    />
+                    <Tooltip 
+                      cursor={{fill: 'rgba(255,255,255,0.05)'}} 
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                    />
                     <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                       {classStats.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -164,7 +181,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-xl">
+        <Card className="shadow-xl bg-card border-none">
           <CardHeader>
             <CardTitle className="font-headline text-lg">Distribusi Peserta</CardTitle>
           </CardHeader>
@@ -180,13 +197,16 @@ export default function AdminDashboard() {
                       cy="50%"
                       outerRadius={80}
                       label={({ name }) => name}
+                      stroke="none"
                       fontSize={10}
                     >
                       {classStats.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                    />
                   </PieChart>
                </ResponsiveContainer>
              ) : (
@@ -198,7 +218,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Card className="shadow-xl">
+      <Card className="shadow-xl bg-card border-none">
         <CardHeader>
           <CardTitle className="font-headline">Aktivitas Terakhir</CardTitle>
           <CardDescription>Daftar 5 siswa yang baru saja menyelesaikan kuis</CardDescription>
@@ -206,9 +226,9 @@ export default function AdminDashboard() {
         <CardContent>
           <div className="space-y-4">
             {sortedRecentResults.map((r, i) => (
-              <div key={r.id || i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/40 border">
+              <div key={r.id || i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/20 border border-border/50">
                 <div className="flex items-center gap-4 overflow-hidden">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary shrink-0">
                     {r?.studentName ? r.studentName.charAt(0).toUpperCase() : "?"}
                   </div>
                   <div className="min-w-0">
@@ -219,14 +239,14 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="text-right shrink-0 ml-4">
-                  <Badge className={cn((Number(r?.score) || 0) >= 70 ? "bg-primary" : "bg-destructive")}>
+                  <Badge className={cn((Number(r?.score) || 0) >= 70 ? "bg-primary text-primary-foreground" : "bg-destructive text-destructive-foreground")}>
                     {r?.score || 0}%
                   </Badge>
                 </div>
               </div>
             ))}
             {sortedRecentResults.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground italic bg-secondary/20 rounded-2xl border border-dashed">
+              <div className="text-center py-12 text-muted-foreground italic bg-secondary/10 rounded-2xl border border-dashed">
                 Belum ada aktivitas kuis terbaru.
               </div>
             )}
