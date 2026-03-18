@@ -1,58 +1,54 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Mode Terang - Bersih dan Kontras */
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    /* Mode Terang - Kontras Tinggi Maksimal */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 2%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 2%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 214 54% 52%;
+    --popover-foreground: 222 47% 2%;
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 20% 92%;
-    --secondary-foreground: 214 54% 52%;
-    --muted: 210 20% 92%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 192 70% 49%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 2%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 35%;
+    --accent: 199 89% 48%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 214 54% 52%;
+    --border: 214 32% 85%;
+    --input: 214 32% 85%;
+    --ring: 221 83% 53%;
     --radius: 0.75rem;
-    --chart-1: 214 54% 52%;
-    --chart-2: 192 70% 49%;
-    --chart-3: 200 80% 30%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
   }
 
   .dark {
-    /* Mode Gelap - Deep Navy dengan Kontras Tinggi */
-    --background: 222 47% 6%;
+    /* Mode Gelap - Hitam Pekat dengan Kontras Tinggi */
+    --background: 222 47% 2%;
     --foreground: 210 40% 98%;
-    --card: 222 47% 10%;
+    --card: 222 47% 4%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 8%;
+    --popover: 222 47% 3%;
     --popover-foreground: 210 40% 98%;
-    --primary: 214 54% 60%;
-    --primary-foreground: 222 47% 6%;
-    --secondary: 222 47% 12%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 2%;
+    --secondary: 222 47% 8%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 222 47% 15%;
-    --muted-foreground: 215 20% 75%;
-    --accent: 192 70% 55%;
-    --accent-foreground: 222 47% 6%;
+    --muted: 222 47% 10%;
+    --muted-foreground: 215 20% 85%;
+    --accent: 199 89% 55%;
+    --accent-foreground: 222 47% 2%;
     --destructive: 0 62% 45%;
     --destructive-foreground: 210 40% 98%;
-    --border: 222 47% 15%;
-    --input: 222 47% 15%;
-    --ring: 214 54% 60%;
+    --border: 222 47% 12%;
+    --input: 222 47% 12%;
+    --ring: 217 91% 60%;
   }
 }
 
@@ -66,4 +62,13 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
   }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

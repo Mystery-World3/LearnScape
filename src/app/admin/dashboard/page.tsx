@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Users, Target, BookOpen, TrendingUp, Loader2, AlertTriangle } from "lucide-react";
+import { Users, Target, BookOpen, TrendingUp, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from "recharts";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, collectionGroup } from "firebase/firestore";
@@ -34,35 +35,27 @@ export default function AdminDashboard() {
   const totalParticipants = safeResults.length;
   const avgScore = useMemo(() => {
     if (totalParticipants === 0) return 0;
-    try {
-      const total = safeResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
-      return Math.round(total / totalParticipants);
-    } catch (e) {
-      return 0;
-    }
+    const total = safeResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
+    return Math.round(total / totalParticipants);
   }, [safeResults, totalParticipants]);
   
   const classStats = useMemo(() => {
     if (!safeClasses.length) return [];
     return safeClasses.map(c => {
-      try {
-        const classResults = safeResults.filter(r => r?.classId === c?.id);
-        const totalScore = classResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
-        return {
-          name: c?.name || "Materi",
-          count: classResults.length,
-          avg: classResults.length ? Math.round(totalScore / classResults.length) : 0
-        };
-      } catch (e) {
-        return { name: c?.name || "Error", count: 0, avg: 0 };
-      }
+      const classResults = safeResults.filter(r => r?.classId === c?.id);
+      const totalScore = classResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
+      return {
+        name: c?.name || "Materi",
+        count: classResults.length,
+        avg: classResults.length ? Math.round(totalScore / classResults.length) : 0
+      };
     });
   }, [safeClasses, safeResults]);
 
   const sortedRecentResults = useMemo(() => {
     if (!safeResults.length) return [];
     return [...safeResults]
-      .filter(r => r && r.timestamp && !isNaN(new Date(r.timestamp).getTime()))
+      .filter(r => r && r.timestamp)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 5);
   }, [safeResults]);
@@ -73,7 +66,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground">
         <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" />
-        <p className="font-medium text-lg">Menyiapkan dashboard...</p>
+        <p className="font-medium text-lg">Menghubungkan ke Database...</p>
       </div>
     );
   }
@@ -92,55 +85,68 @@ export default function AdminDashboard() {
       </div>
 
       {hasError && (
-        <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+        <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive border-l-4">
           <AlertTriangle className="h-5 w-5" />
-          <AlertTitle className="font-bold">Informasi Database</AlertTitle>
-          <AlertDescription>
-            {classesError?.message.includes("index") || resultsError?.message.includes("index") 
-              ? "Firebase membutuhkan Index untuk query gabungan. Silakan cek konsol browser (F12) untuk link pembuatan index otomatis."
-              : "Terjadi kendala saat memuat data. Pastikan koneksi internet stabil."}
+          <AlertTitle className="font-bold">Konfigurasi Database Diperlukan</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p>
+              {classesError?.message.includes("index") || resultsError?.message.includes("index") 
+                ? "Firebase membutuhkan Index untuk menampilkan statistik. Silakan cek konsol browser (F12) untuk link pembuatan index otomatis."
+                : (classesError?.message.includes("permission") || resultsError?.message.includes("permission"))
+                ? "Izin akses ditolak. Pastikan 'Firestore Security Rules' Anda sudah diperbarui untuk mendukung 'collectionGroup'."
+                : "Terjadi kendala saat memuat data. Pastikan koneksi internet stabil."}
+            </p>
           </AlertDescription>
         </Alert>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-none shadow-xl bg-primary text-primary-foreground">
-          <CardHeader className="pb-2">
-            <Users className="h-8 w-8 opacity-60 mb-2" />
-            <CardTitle className="text-4xl font-headline">{totalParticipants}</CardTitle>
-            <CardDescription className="text-primary-foreground/80 font-medium">Total Peserta</CardDescription>
+        <Card className="border-none shadow-xl bg-primary text-primary-foreground overflow-hidden relative">
+          <div className="absolute right-[-10%] top-[-10%] opacity-10 rotate-12">
+            <Users size={120} />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-5xl font-headline">{totalParticipants}</CardTitle>
+            <CardDescription className="text-primary-foreground font-bold opacity-80">Total Peserta</CardDescription>
           </CardHeader>
         </Card>
 
-        <Card className="border-none shadow-xl bg-accent text-accent-foreground">
-          <CardHeader className="pb-2">
-            <Target className="h-8 w-8 opacity-60 mb-2" />
-            <CardTitle className="text-4xl font-headline">{avgScore}%</CardTitle>
-            <CardDescription className="text-accent-foreground/80 font-medium">Rata-rata Skor</CardDescription>
+        <Card className="border-none shadow-xl bg-accent text-accent-foreground overflow-hidden relative">
+          <div className="absolute right-[-10%] top-[-10%] opacity-10 rotate-12">
+            <Target size={120} />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-5xl font-headline">{avgScore}%</CardTitle>
+            <CardDescription className="text-accent-foreground font-bold opacity-80">Rata-rata Skor</CardDescription>
           </CardHeader>
         </Card>
 
-        <Card className="border-none shadow-xl bg-card">
+        <Card className="border shadow-xl bg-card">
           <CardHeader className="pb-2">
-            <BookOpen className="h-8 w-8 text-primary opacity-60 mb-2" />
-            <CardTitle className="text-4xl font-headline">{safeClasses.length}</CardTitle>
-            <CardDescription className="font-medium text-muted-foreground">Materi Aktif</CardDescription>
+            <CardTitle className="text-5xl font-headline text-primary">{safeClasses.length}</CardTitle>
+            <CardDescription className="font-bold text-muted-foreground">Materi Aktif</CardDescription>
           </CardHeader>
         </Card>
 
-        <Card className="border-none shadow-xl bg-card">
+        <Card className="border shadow-xl bg-card">
           <CardHeader className="pb-2">
-            <TrendingUp className="h-8 w-8 text-accent opacity-60 mb-2" />
-            <CardTitle className="text-4xl font-headline">Live</CardTitle>
-            <CardDescription className="font-medium text-muted-foreground">Koneksi Database</CardDescription>
+            <div className="flex items-center gap-2 mb-1">
+               <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
+               <span className="text-xs font-bold text-green-500 uppercase">Live</span>
+            </div>
+            <CardTitle className="text-3xl font-headline">Aktif</CardTitle>
+            <CardDescription className="font-bold text-muted-foreground">Status Sinkron</CardDescription>
           </CardHeader>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="shadow-xl bg-card border-none">
+        <Card className="shadow-2xl bg-card border">
           <CardHeader>
-            <CardTitle className="font-headline text-lg">Skor Rata-rata per Kelas (%)</CardTitle>
+            <CardTitle className="font-headline text-lg flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Skor Rata-rata per Kelas (%)
+            </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px] w-full pt-4">
              {classStats.length > 0 ? (
@@ -163,8 +169,8 @@ export default function AdminDashboard() {
                       opacity={0.5}
                     />
                     <Tooltip 
-                      cursor={{fill: 'rgba(255,255,255,0.05)'}} 
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                      cursor={{fill: 'rgba(0,0,0,0.05)'}} 
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
                     />
                     <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                       {classStats.map((_, index) => (
@@ -181,9 +187,9 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-xl bg-card border-none">
+        <Card className="shadow-2xl bg-card border">
           <CardHeader>
-            <CardTitle className="font-headline text-lg">Distribusi Peserta</CardTitle>
+            <CardTitle className="font-headline text-lg">Distribusi Peserta per Kelas</CardTitle>
           </CardHeader>
           <CardContent className="h-[300px] w-full pt-4">
              {classStats.some(s => s.count > 0) ? (
@@ -197,7 +203,8 @@ export default function AdminDashboard() {
                       cy="50%"
                       outerRadius={80}
                       label={({ name }) => name}
-                      stroke="none"
+                      stroke="hsl(var(--card))"
+                      strokeWidth={2}
                       fontSize={10}
                     >
                       {classStats.map((_, index) => (
@@ -205,7 +212,7 @@ export default function AdminDashboard() {
                       ))}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))' }}
                     />
                   </PieChart>
                </ResponsiveContainer>
@@ -218,35 +225,38 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Card className="shadow-xl bg-card border-none">
-        <CardHeader>
-          <CardTitle className="font-headline">Aktivitas Terakhir</CardTitle>
+      <Card className="shadow-2xl bg-card border overflow-hidden">
+        <CardHeader className="bg-secondary/30 border-b">
+          <CardTitle className="font-headline flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            Aktivitas Terakhir
+          </CardTitle>
           <CardDescription>Daftar 5 siswa yang baru saja menyelesaikan kuis</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="p-0">
+          <div className="divide-y">
             {sortedRecentResults.map((r, i) => (
-              <div key={r.id || i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/20 border border-border/50">
+              <div key={r.id || i} className="flex items-center justify-between p-5 hover:bg-secondary/10 transition-colors">
                 <div className="flex items-center gap-4 overflow-hidden">
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary shrink-0">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0 border border-primary/20">
                     {r?.studentName ? r.studentName.charAt(0).toUpperCase() : "?"}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-bold truncate">{r?.studentName || "Siswa"}</div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {safeClasses.find(c => c.id === r.classId)?.name || "Kuis"} • {r?.timestamp ? new Date(r.timestamp).toLocaleDateString('id-ID') : "-"}
+                    <div className="font-bold text-lg leading-tight truncate">{r?.studentName || "Siswa"}</div>
+                    <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                      {safeClasses.find(c => c.id === r.classId)?.name || "Kuis"} • {r?.timestamp ? new Date(r.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : "-"}
                     </div>
                   </div>
                 </div>
                 <div className="text-right shrink-0 ml-4">
-                  <Badge className={cn((Number(r?.score) || 0) >= 70 ? "bg-primary text-primary-foreground" : "bg-destructive text-destructive-foreground")}>
+                  <Badge className={cn("text-lg px-4 py-1", (Number(r?.score) || 0) >= 70 ? "bg-green-500 text-white" : "bg-destructive text-white")}>
                     {r?.score || 0}%
                   </Badge>
                 </div>
               </div>
             ))}
             {sortedRecentResults.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground italic bg-secondary/10 rounded-2xl border border-dashed">
+              <div className="text-center py-20 text-muted-foreground italic">
                 Belum ada aktivitas kuis terbaru.
               </div>
             )}
