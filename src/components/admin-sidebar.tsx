@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -20,7 +19,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
   { label: "Manajemen Kelas", icon: BookOpen, href: "/admin/classes" },
   { label: "Manajemen Soal", icon: HelpCircle, href: "/admin/questions" },
-  { label: "Kelola Nilai", icon: Trophy, href: "/admin/results" },
+  { label: "Manajemen Nilai", icon: Trophy, href: "/admin/results" },
 ];
 
 export function AdminSidebar() {

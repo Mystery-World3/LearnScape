@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -8,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Search, Trash2, Edit2, Trophy, User, Calendar } from "lucide-react";
+import { Search, Trash2, Edit2, User, Calendar } from "lucide-react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { QuizResult, Class } from "@/lib/types";
 import { MOCK_RESULTS, MOCK_CLASSES } from "@/lib/mock-data";
@@ -54,7 +53,7 @@ export default function ResultManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Kelola Nilai Siswa</h1>
+        <h1 className="text-3xl font-headline font-bold">Manajemen Nilai Siswa</h1>
         <p className="text-muted-foreground">Lihat dan kelola hasil kuis yang telah diselesaikan oleh siswa.</p>
       </div>
 
