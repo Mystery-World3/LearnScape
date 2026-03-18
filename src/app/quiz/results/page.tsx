@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, XCircle, Home, RotateCcw, Award, Lightbulb, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Home, RotateCcw, Award, Lightbulb, Loader2, List, Hash, Type } from "lucide-react";
 import { useFirestore, useDoc, useMemoFirebase, useCollection } from "@/firebase";
 import { doc, collectionGroup } from "firebase/firestore";
 import { QuizResult, Question, Class } from "@/lib/types";
@@ -116,29 +116,45 @@ function ResultsContent() {
               const question = questions?.find(q => q.id === answer.questionId);
               if (!question) return null;
 
+              const studentDisplay = question.type === 'multiple-choice' 
+                ? (question.options?.[answer.selectedOptionIndex!] || "Tidak dijawab")
+                : (answer.studentAnswer || "Tidak dijawab");
+
+              const correctDisplay = question.type === 'multiple-choice'
+                ? (question.options?.[question.correctAnswerIndex!] || "")
+                : (question.correctAnswer || "");
+
               return (
                 <Card key={idx} className={cn("overflow-hidden border-l-8", answer.isCorrect ? "border-l-primary" : "border-l-destructive")}>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">Soal {idx + 1}</CardTitle>
+                      <div className="flex flex-col gap-1">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          Soal {idx + 1}
+                          <Badge variant="outline" className="text-[10px] h-5">
+                             {question.type === 'multiple-choice' ? <List className="h-3 w-3 mr-1" /> : question.type === 'number' ? <Hash className="h-3 w-3 mr-1" /> : <Type className="h-3 w-3 mr-1" />}
+                             {question.type?.replace('-', ' ')}
+                          </Badge>
+                        </CardTitle>
+                        <p className="text-muted-foreground mt-1">{question.statement}</p>
+                      </div>
                       <Badge variant={answer.isCorrect ? "default" : "destructive"}>
                         {answer.isCorrect ? "Benar" : "Salah"}
                       </Badge>
                     </div>
-                    <p className="text-muted-foreground mt-2">{question.statement}</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <span className="text-xs font-bold text-muted-foreground uppercase">Jawaban Kamu</span>
                         <div className={cn("p-3 rounded-lg border", !answer.isCorrect && "bg-destructive/10 border-destructive text-destructive font-bold")}>
-                          {question.options[answer.selectedOptionIndex] || "Tidak dijawab"}
+                          {studentDisplay}
                         </div>
                       </div>
                       <div className="space-y-1">
                         <span className="text-xs font-bold text-muted-foreground uppercase">Jawaban Benar</span>
                         <div className="p-3 rounded-lg border-primary bg-primary/10 text-primary font-bold">
-                          {question.options[question.correctAnswerIndex]}
+                          {correctDisplay}
                         </div>
                       </div>
                     </div>

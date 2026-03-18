@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Edit2, Trash2, Search, BookOpen, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Edit2, Trash2, Search, BookOpen, Loader2, Power } from "lucide-react";
 import { useFirestore, useCollection, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import { Class } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export default function ClassManagement() {
   const firestore = useFirestore();
@@ -21,7 +23,7 @@ export default function ClassManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [formData, setFormData] = useState({ name: "", description: "", isActive: true });
 
   const filteredClasses = classes?.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -35,13 +37,19 @@ export default function ClassManagement() {
       id: classId,
       name: formData.name,
       description: formData.description,
+      isActive: formData.isActive,
       createdAt: editingClass?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }, { merge: true });
 
     setIsOpen(false);
     setEditingClass(null);
-    setFormData({ name: "", description: "" });
+    setFormData({ name: "", description: "", isActive: true });
+  };
+
+  const toggleStatus = (c: Class) => {
+    const docRef = doc(firestore, "classes", c.id);
+    setDocumentNonBlocking(docRef, { ...c, isActive: !c.isActive, updatedAt: new Date().toISOString() }, { merge: true });
   };
 
   const handleDelete = (id: string) => {
@@ -56,11 +64,11 @@ export default function ClassManagement() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-headline font-bold">Manajemen Kelas</h1>
-          <p className="text-muted-foreground">Tambah, ubah, atau hapus kategori kelas matematika.</p>
+          <p className="text-muted-foreground">Aktifkan atau nonaktifkan materi kuis untuk siswa.</p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditingClass(null); setFormData({ name: "", description: "" }); }} className="gap-2">
+            <Button onClick={() => { setEditingClass(null); setFormData({ name: "", description: "", isActive: true }); }} className="gap-2">
               <Plus className="h-5 w-5" /> Tambah Kelas Baru
             </Button>
           </DialogTrigger>
@@ -85,6 +93,16 @@ export default function ClassManagement() {
                   value={formData.description} 
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
                   placeholder="Deskripsi singkat..."
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg bg-secondary/20">
+                <div className="space-y-0.5">
+                  <Label>Status Aktif</Label>
+                  <p className="text-xs text-muted-foreground">Siswa hanya bisa melihat kelas yang aktif.</p>
+                </div>
+                <Switch 
+                  checked={formData.isActive} 
+                  onCheckedChange={(val) => setFormData({ ...formData, isActive: val })} 
                 />
               </div>
             </div>
@@ -119,6 +137,7 @@ export default function ClassManagement() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nama Kelas</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Deskripsi</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
@@ -129,12 +148,20 @@ export default function ClassManagement() {
                     <TableCell className="font-bold text-primary flex items-center gap-2">
                       <BookOpen className="h-4 w-4 opacity-50" /> {c.name}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{c.description || "-"}</TableCell>
+                    <TableCell>
+                      <Badge variant={c.isActive ? "default" : "secondary"} className={cn(c.isActive ? "bg-green-500 hover:bg-green-600" : "opacity-50")}>
+                        {c.isActive ? "Aktif" : "Nonaktif"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground max-w-xs truncate">{c.description || "-"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => toggleStatus(c)} title={c.isActive ? "Nonaktifkan" : "Aktifkan"}>
+                          <Power className={cn("h-4 w-4", c.isActive ? "text-green-500" : "text-muted-foreground")} />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => {
                           setEditingClass(c);
-                          setFormData({ name: c.name, description: c.description || "" });
+                          setFormData({ name: c.name, description: c.description || "", isActive: c.isActive });
                           setIsOpen(true);
                         }}>
                           <Edit2 className="h-4 w-4" />
@@ -148,7 +175,7 @@ export default function ClassManagement() {
                 ))}
                 {filteredClasses.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
                       Tidak ada kelas ditemukan.
                     </TableCell>
                   </TableRow>

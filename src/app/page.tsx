@@ -9,11 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, ArrowRight, User, Loader2 } from "lucide-react";
+import { GraduationCap, ArrowRight, User, Loader2, Info } from "lucide-react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Class } from "@/lib/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -21,6 +22,8 @@ export default function LandingPage() {
   
   const classesQuery = useMemoFirebase(() => collection(firestore, "classes"), [firestore]);
   const { data: classes, isLoading } = useCollection<Class>(classesQuery);
+
+  const activeClasses = classes?.filter(c => c.isActive) || [];
 
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [studentName, setStudentName] = useLocalStorage<string>("student_name", "");
@@ -74,29 +77,31 @@ export default function LandingPage() {
                     <SelectValue placeholder={isLoading ? "Memuat kelas..." : "Pilih jenjang kelas..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {classes?.map((c) => (
+                    {activeClasses.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
                     ))}
-                    {classes?.length === 0 && !isLoading && (
-                      <div className="p-4 text-sm text-muted-foreground text-center">
-                        Belum ada kelas tersedia.
+                    {activeClasses.length === 0 && !isLoading && (
+                      <div className="p-4 text-sm text-muted-foreground text-center italic">
+                        Belum ada kelas aktif yang tersedia saat ini.
                       </div>
                     )}
                   </SelectContent>
                 </Select>
 
-                <Button 
-                  className="w-full h-14 text-lg font-bold gap-2 rounded-xl bg-[#98a3e0] hover:bg-[#3b49df] text-white transition-all group"
-                  disabled={!selectedClass || isLoading}
-                  onClick={handleStartQuiz}
-                >
-                  {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "Mulai Belajar"}
-                  {!isLoading && <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />}
-                </Button>
+                {activeClasses.length > 0 && (
+                  <Button 
+                    className="w-full h-14 text-lg font-bold gap-2 rounded-xl bg-[#98a3e0] hover:bg-[#3b49df] text-white transition-all group"
+                    disabled={!selectedClass || isLoading}
+                    onClick={handleStartQuiz}
+                  >
+                    {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "Mulai Belajar"}
+                    {!isLoading && <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />}
+                  </Button>
+                )}
                 
-                {studentName && (
+                {studentName && activeClasses.length > 0 && (
                   <button 
                     onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
                     className="text-xs text-muted-foreground hover:text-primary transition-colors underline"
@@ -107,6 +112,15 @@ export default function LandingPage() {
               </div>
             </CardContent>
           </Card>
+          
+          {activeClasses.length === 0 && !isLoading && (
+            <Alert className="max-w-md mx-auto border-dashed">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Hubungi Bapak/Ibu Guru untuk mengaktifkan kuis kelasmu.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         <Dialog open={isNameDialogOpen} onOpenChange={setIsNameDialogOpen}>
