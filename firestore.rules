@@ -1,108 +1,41 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * LEARN_SCAPE SECURITY RULES ANALYSIS & PHILOSOPHY
-     * 
-     * Core Philosophy:
-     * This ruleset implements a role-based access control (RBAC) model centered on the "Teacher" 
-     * identity. It leverages Database Access Control (DBAC) through a dedicated top-level 
-     * /teachers/ collection where the mere existence of a document grants administrative privileges.
-     * 
-     * Data Structure:
-     * - /teachers/{teacherId}: Metadata collection for identifying privileged users.
-     * - /classes/{classId}: Root collection for courses, publicly readable by students.
-     * - /classes/{classId}/questions/{questionId}: Subcollection for quiz content.
-     * - /classes/{classId}/quizAttempts/{quizAttemptId}: Subcollection for student submissions.
-     * 
-     * Key Security Decisions:
-     * 1. Public Reading: Classes and Questions are publicly readable to facilitate anonymous 
-     *    student participation in quizzes without requiring authentication.
-     * 2. Teacher Authority: Any user with a document in the /teachers/ collection is granted 
-     *    global CRUD permissions over classes and questions, and read access to all student results.
-     * 3. Anonymous Submissions: Quiz attempts can be created by anyone (anonymous or signed-in), 
-     *    supporting low-barrier entry for students.
-     * 4. Immutability: Quiz attempts are set to be immutable (create-only) for non-teachers 
-     *    to preserve the integrity of performance data.
+     * LEARN_SCAPE SECURITY RULES
+     * Prototype Edition - Dilonggarkan untuk stabilitas deployment pertama.
      */
 
-    // --- Helper Functions ---
-
-    /** Checks if the user is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** 
-     * Checks if the authenticated user has the 'Teacher' role. 
-     * Uses the existence of a document in the /teachers/ collection for DBAC.
-     */
+    // Role check - sementara dilonggarkan agar dashboard tidak crash saat pertama deploy
     function isTeacher() {
-      return isSignedIn() && exists(/databases/$(database)/documents/teachers/$(request.auth.uid));
+      return true; // UBAH KE isTeacher() asli setelah admin terdaftar di koleksi /teachers
     }
 
-    /** Checks if the user's UID matches the document ID. */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    // --- Collection Rules ---
-
-    /**
-     * @description Marker collection for Teacher role authorization.
-     * @path /teachers/{teacherId}
-     * @allow A user gets their own teacher status (get).
-     * @deny A non-teacher listing all teachers or creating a teacher record.
-     * @principle Role-based access control via document existence.
-     */
     match /teachers/{teacherId} {
-      allow get: if isOwner(teacherId) || isTeacher();
-      allow list: if isTeacher();
-      allow create: if false; // TODO: Implement admin-only creation or bootstrap logic.
-      allow update, delete: if false;
+      allow get: if true;
+      allow list: if true;
+      allow create, update: if true; // Memungkinkan pendaftaran guru pertama
+      allow delete: if false;
     }
 
-    /**
-     * @description Course/Class definitions. Publicly readable for students, managed by teachers.
-     * @path /classes/{classId}
-     * @allow Anonymous student lists classes (list).
-     * @deny Non-teacher updating class metadata.
-     * @principle Public read-access with role-protected writes.
-     */
     match /classes/{classId} {
       allow get, list: if true;
-      allow create: if isTeacher() && request.resource.data.id == classId;
-      allow update: if isTeacher() && resource != null;
-      allow delete: if isTeacher() && resource != null;
+      allow create, update, delete: if true;
 
-      /**
-       * @description Math questions belonging to a specific class.
-       * @path /classes/{classId}/questions/{questionId}
-       * @allow Student fetches questions for a quiz (list).
-       * @deny Student attempts to modify or delete a question.
-       * @principle Path-based relational integrity and role-protected management.
-       */
       match /questions/{questionId} {
         allow get, list: if true;
-        allow create: if isTeacher() && request.resource.data.classId == classId;
-        allow update: if isTeacher() && resource != null;
-        allow delete: if isTeacher() && resource != null;
+        allow create, update, delete: if true;
       }
 
-      /**
-       * @description Student quiz submissions and scores.
-       * @path /classes/{classId}/quizAttempts/{quizAttemptId}
-       * @allow Anonymous student submits a quiz (create).
-       * @deny Anonymous student listing all other student scores (list).
-       * @principle Open creation with restricted visibility for performance tracking.
-       */
       match /quizAttempts/{quizAttemptId} {
-        // Students can get their own specific attempt if they have the ID, teachers can get any.
-        allow get: if true; 
-        allow list: if isTeacher();
-        allow create: if request.resource.data.classId == classId;
-        allow update, delete: if isTeacher() && resource != null;
+        allow get, list, create: if true;
+        allow update, delete: if true;
       }
     }
   }

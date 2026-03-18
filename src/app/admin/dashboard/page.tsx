@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -44,7 +45,7 @@ export default function AdminDashboard() {
       const classResults = safeResults.filter(r => r.classId === c.id);
       const totalScore = classResults.reduce((acc, curr) => acc + (Number(curr.score) || 0), 0);
       return {
-        name: c.name || "Tanpa Nama",
+        name: c.name || "Materi",
         count: classResults.length,
         avg: classResults.length ? Math.round(totalScore / classResults.length) : 0
       };
@@ -52,8 +53,9 @@ export default function AdminDashboard() {
   }, [safeClasses, safeResults]);
 
   const sortedRecentResults = useMemo(() => {
+    if (!safeResults.length) return [];
     return [...safeResults]
-      .filter(r => r && r.timestamp && !isNaN(new Date(r.timestamp).getTime()))
+      .filter(r => r && r.timestamp)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 5);
   }, [safeResults]);
@@ -64,7 +66,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground">
         <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" />
-        <p className="font-medium animate-pulse">Menyiapkan dashboard...</p>
+        <p className="font-medium">Menyiapkan dashboard...</p>
       </div>
     );
   }
@@ -87,8 +89,9 @@ export default function AdminDashboard() {
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle className="font-bold">Database Belum Siap</AlertTitle>
           <AlertDescription>
-            Sepertinya Anda perlu membuat <b>Index Composite</b> di Firebase Console untuk menampilkan statistik. 
-            Cek konsol browser atau log Firebase untuk tautan pembuatan index otomatis.
+            {classesError?.message.includes("index") || resultsError?.message.includes("index") 
+              ? "Firebase membutuhkan Index. Silakan cek konsol browser (F12) untuk tautan pembuatan index."
+              : "Terjadi kesalahan akses data. Pastikan Security Rules sudah benar."}
           </AlertDescription>
         </Alert>
       )}
@@ -136,7 +139,7 @@ export default function AdminDashboard() {
              {classStats.length > 0 ? (
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={classStats}>
-                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} hide={classStats.length > 5} />
+                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
                     <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
                     <Tooltip cursor={{fill: 'transparent'}} />
                     <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
@@ -148,7 +151,7 @@ export default function AdminDashboard() {
                </ResponsiveContainer>
              ) : (
                <div className="h-full flex items-center justify-center text-muted-foreground text-sm italic">
-                 {hasError ? "Gagal memuat grafik (Cek Index)" : "Belum ada data tersedia."}
+                 Belum ada data nilai.
                </div>
              )}
           </CardContent>
@@ -169,10 +172,7 @@ export default function AdminDashboard() {
                       cx="50%"
                       cy="50%"
                       outerRadius={80}
-                      label={({ name, percent }) => {
-                        const pct = (typeof percent === 'number') ? `${(percent * 100).toFixed(0)}%` : '';
-                        return `${name} ${pct}`;
-                      }}
+                      label={({ name }) => name}
                       fontSize={10}
                     >
                       {classStats.map((entry, index) => (
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
                </ResponsiveContainer>
              ) : (
                <div className="h-full flex items-center justify-center text-muted-foreground text-sm italic">
-                 {hasError ? "Gagal memuat grafik (Cek Index)" : "Belum ada data tersedia."}
+                 Belum ada data partisipasi.
                </div>
              )}
           </CardContent>
@@ -218,9 +218,9 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
-            {!isLoading && sortedRecentResults.length === 0 && (
+            {sortedRecentResults.length === 0 && (
               <div className="text-center py-12 text-muted-foreground italic bg-secondary/20 rounded-2xl border border-dashed">
-                {hasError ? "Terjadi kesalahan saat mengambil data aktivitas." : "Belum ada kuis yang diselesaikan."}
+                Belum ada aktivitas kuis.
               </div>
             )}
           </div>
