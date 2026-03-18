@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Users, Target, BookOpen, Clock, TrendingUp, Loader2 } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
+import { Users, Target, BookOpen, Clock, TrendingUp, Loader2, AlertTriangle } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from "recharts";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, collectionGroup } from "firebase/firestore";
 import { QuizResult, Class } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
@@ -20,29 +20,33 @@ export default function AdminDashboard() {
   }, []);
 
   const classesQuery = useMemoFirebase(() => collection(firestore, "classes"), [firestore]);
-  const { data: classes, isLoading: classesLoading } = useCollection<Class>(classesQuery);
+  const { data: classes, isLoading: classesLoading, error: classesError } = useCollection<Class>(classesQuery);
 
   const resultsQuery = useMemoFirebase(() => collectionGroup(firestore, "quizAttempts"), [firestore]);
-  const { data: results, isLoading: resultsLoading } = useCollection<QuizResult>(resultsQuery);
+  const { data: results, isLoading: resultsLoading, error: resultsError } = useCollection<QuizResult>(resultsQuery);
 
   const isLoading = !mounted || classesLoading || resultsLoading;
+  const hasError = !!classesError || !!resultsError;
 
-  const safeResults = useMemo(() => results || [], [results]);
-  const safeClasses = useMemo(() => classes || [], [classes]);
+  const safeResults = useMemo(() => Array.isArray(results) ? results : [], [results]);
+  const safeClasses = useMemo(() => Array.isArray(classes) ? classes : [], [classes]);
 
   const totalParticipants = safeResults.length;
   const avgScore = useMemo(() => {
     if (totalParticipants === 0) return 0;
-    return Math.round(safeResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / totalParticipants);
+    const total = safeResults.reduce((acc, curr) => acc + (Number(curr.score) || 0), 0);
+    return Math.round(total / totalParticipants);
   }, [safeResults, totalParticipants]);
   
   const classStats = useMemo(() => {
+    if (!safeClasses.length) return [];
     return safeClasses.map(c => {
       const classResults = safeResults.filter(r => r.classId === c.id);
+      const totalScore = classResults.reduce((acc, curr) => acc + (Number(curr.score) || 0), 0);
       return {
-        name: c.name,
+        name: c.name || "Tanpa Nama",
         count: classResults.length,
-        avg: classResults.length ? Math.round(classResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / classResults.length) : 0
+        avg: classResults.length ? Math.round(totalScore / classResults.length) : 0
       };
     });
   }, [safeClasses, safeResults]);
@@ -54,19 +58,19 @@ export default function AdminDashboard() {
       .slice(0, 5);
   }, [safeResults]);
 
-  const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+  const COLORS = ['#3b49df', '#facc15', '#10b981', '#f43f5e', '#8b5cf6'];
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] text-muted-foreground">
+      <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground">
         <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" />
-        <p className="font-medium">Menyiapkan dashboard statistik...</p>
+        <p className="font-medium animate-pulse">Menyiapkan dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pb-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-4xl font-headline font-bold">Ringkasan Statistik</h1>
@@ -78,18 +82,29 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {hasError && (
+        <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle className="font-bold">Database Belum Siap</AlertTitle>
+          <AlertDescription>
+            Sepertinya Anda perlu membuat <b>Index Composite</b> di Firebase Console untuk menampilkan statistik. 
+            Cek konsol browser atau log Firebase untuk tautan pembuatan index otomatis.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-none shadow-xl bg-primary text-primary-foreground">
           <CardHeader className="pb-2">
-            <Users className="h-8 w-8 opacity-50 mb-2" />
+            <Users className="h-8 w-8 opacity-40 mb-2" />
             <CardTitle className="text-4xl font-headline">{totalParticipants}</CardTitle>
-            <CardDescription className="text-primary-foreground/70 font-medium">Total Peserta Kuis</CardDescription>
+            <CardDescription className="text-primary-foreground/70 font-medium">Total Peserta</CardDescription>
           </CardHeader>
         </Card>
 
         <Card className="border-none shadow-xl bg-accent text-accent-foreground">
           <CardHeader className="pb-2">
-            <Target className="h-8 w-8 opacity-50 mb-2" />
+            <Target className="h-8 w-8 opacity-40 mb-2" />
             <CardTitle className="text-4xl font-headline">{avgScore}%</CardTitle>
             <CardDescription className="text-accent-foreground/70 font-medium">Rata-rata Skor</CardDescription>
           </CardHeader>
@@ -97,7 +112,7 @@ export default function AdminDashboard() {
 
         <Card className="border-none shadow-xl bg-white dark:bg-card">
           <CardHeader className="pb-2">
-            <BookOpen className="h-8 w-8 text-primary opacity-50 mb-2" />
+            <BookOpen className="h-8 w-8 text-primary opacity-40 mb-2" />
             <CardTitle className="text-4xl font-headline text-foreground">{safeClasses.length}</CardTitle>
             <CardDescription className="font-medium">Kelas Aktif</CardDescription>
           </CardHeader>
@@ -105,9 +120,9 @@ export default function AdminDashboard() {
 
         <Card className="border-none shadow-xl bg-white dark:bg-card">
           <CardHeader className="pb-2">
-            <TrendingUp className="h-8 w-8 text-accent opacity-50 mb-2" />
+            <TrendingUp className="h-8 w-8 text-accent opacity-40 mb-2" />
             <CardTitle className="text-4xl font-headline text-foreground">Online</CardTitle>
-            <CardDescription className="font-medium">Status Koneksi</CardDescription>
+            <CardDescription className="font-medium">Status Server</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -115,15 +130,15 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle className="font-headline">Distribusi Skor per Kelas</CardTitle>
-            <CardDescription>Perbandingan nilai rata-rata tiap mata pelajaran (%)</CardDescription>
+            <CardTitle className="font-headline text-lg">Nilai Rata-rata per Kelas (%)</CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px]">
+          <CardContent className="h-[300px] w-full pt-4">
              {classStats.length > 0 ? (
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={classStats}>
-                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}%`} />
+                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} hide={classStats.length > 5} />
+                    <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
+                    <Tooltip cursor={{fill: 'transparent'}} />
                     <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                       {classStats.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -133,7 +148,7 @@ export default function AdminDashboard() {
                </ResponsiveContainer>
              ) : (
                <div className="h-full flex items-center justify-center text-muted-foreground text-sm italic">
-                 Belum ada data skor untuk ditampilkan.
+                 {hasError ? "Gagal memuat grafik (Cek Index)" : "Belum ada data tersedia."}
                </div>
              )}
           </CardContent>
@@ -141,10 +156,9 @@ export default function AdminDashboard() {
 
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle className="font-headline">Populasi Siswa</CardTitle>
-            <CardDescription>Jumlah partisipasi siswa berdasarkan kelas</CardDescription>
+            <CardTitle className="font-headline text-lg">Partisipasi Siswa</CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px]">
+          <CardContent className="h-[300px] w-full pt-4">
              {classStats.some(s => s.count > 0) ? (
                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -156,8 +170,8 @@ export default function AdminDashboard() {
                       cy="50%"
                       outerRadius={80}
                       label={({ name, percent }) => {
-                        const pct = (typeof percent === 'number' && !isNaN(percent)) ? (percent * 100).toFixed(0) : '0';
-                        return `${name} ${pct}%`;
+                        const pct = (typeof percent === 'number') ? `${(percent * 100).toFixed(0)}%` : '';
+                        return `${name} ${pct}`;
                       }}
                       fontSize={10}
                     >
@@ -165,11 +179,12 @@ export default function AdminDashboard() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
+                    <Tooltip />
                   </PieChart>
                </ResponsiveContainer>
              ) : (
                <div className="h-full flex items-center justify-center text-muted-foreground text-sm italic">
-                 Belum ada data populasi untuk ditampilkan.
+                 {hasError ? "Gagal memuat grafik (Cek Index)" : "Belum ada data tersedia."}
                </div>
              )}
           </CardContent>
@@ -190,22 +205,22 @@ export default function AdminDashboard() {
                     {r.studentName ? r.studentName.charAt(0).toUpperCase() : "?"}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-bold truncate">{r.studentName || "Siswa Tanpa Nama"}</div>
+                    <div className="font-bold truncate">{r.studentName || "Siswa"}</div>
                     <div className="text-xs text-muted-foreground">
-                      {safeClasses.find(c => c.id === r.classId)?.name || "Kelas N/A"} • {r.timestamp ? new Date(r.timestamp).toLocaleDateString('id-ID') : "-"}
+                      {safeClasses.find(c => c.id === r.classId)?.name || "Materi Umum"} • {r.timestamp ? new Date(r.timestamp).toLocaleDateString('id-ID') : "-"}
                     </div>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <Badge className={cn((r.score || 0) >= 70 ? "bg-primary" : "bg-destructive")}>
+                  <Badge className={cn((Number(r.score) || 0) >= 70 ? "bg-primary" : "bg-destructive")}>
                     {r.score || 0}%
                   </Badge>
                 </div>
               </div>
             ))}
-            {sortedRecentResults.length === 0 && (
+            {!isLoading && sortedRecentResults.length === 0 && (
               <div className="text-center py-12 text-muted-foreground italic bg-secondary/20 rounded-2xl border border-dashed">
-                Belum ada aktivitas kuis yang tercatat.
+                {hasError ? "Terjadi kesalahan saat mengambil data aktivitas." : "Belum ada kuis yang diselesaikan."}
               </div>
             )}
           </div>
