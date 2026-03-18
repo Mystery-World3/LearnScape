@@ -8,7 +8,8 @@ import {
   BookOpen, 
   HelpCircle, 
   LogOut,
-  GraduationCap
+  GraduationCap,
+  Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
   { label: "Manajemen Kelas", icon: BookOpen, href: "/admin/classes" },
   { label: "Manajemen Soal", icon: HelpCircle, href: "/admin/questions" },
+  { label: "Kelola Nilai", icon: Trophy, href: "/admin/results" },
 ];
 
 export function AdminSidebar() {

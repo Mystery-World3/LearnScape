@@ -7,18 +7,35 @@ import { Navbar } from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GraduationCap, ArrowRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { GraduationCap, ArrowRight, User } from "lucide-react";
 import { MOCK_CLASSES } from "@/lib/mock-data";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export default function LandingPage() {
   const router = useRouter();
   const [selectedClass, setSelectedClass] = useState<string>("");
-  const [studentName] = useLocalStorage<string>("student_name", "Siswa");
+  const [studentName, setStudentName] = useLocalStorage<string>("student_name", "");
+  const [tempName, setTempName] = useState("");
+  const [isNameDialogOpen, setIsNameDialogOpen] = useState(false);
   const [classes] = useLocalStorage("classes", MOCK_CLASSES);
 
   const handleStartQuiz = () => {
     if (!selectedClass) return;
+    
+    if (!studentName) {
+      setIsNameDialogOpen(true);
+    } else {
+      router.push(`/quiz/${selectedClass}`);
+    }
+  };
+
+  const handleSaveNameAndStart = () => {
+    if (!tempName.trim()) return;
+    setStudentName(tempName.trim());
+    setIsNameDialogOpen(false);
     router.push(`/quiz/${selectedClass}`);
   };
 
@@ -51,7 +68,7 @@ export default function LandingPage() {
                     <SelectValue placeholder="Pilih jenjang kelas..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {classes.map((c) => (
+                    {classes.map((c: any) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
@@ -67,10 +84,55 @@ export default function LandingPage() {
                   Mulai Belajar
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
+                
+                {studentName && (
+                  <button 
+                    onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors underline"
+                  >
+                    Bukan {studentName}? Ubah Nama
+                  </button>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
+
+        <Dialog open={isNameDialogOpen} onOpenChange={setIsNameDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <User className="h-5 w-5 text-primary" />
+                Siapa namamu?
+              </DialogTitle>
+              <DialogDescription>
+                Masukkan nama lengkapmu agar Bapak/Ibu Guru bisa mencatat nilaimu.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nama Lengkap</Label>
+                <Input 
+                  id="name" 
+                  value={tempName} 
+                  onChange={(e) => setTempName(e.target.value)} 
+                  placeholder="Contoh: Budi Santoso"
+                  className="h-12"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                onClick={handleSaveNameAndStart} 
+                className="w-full h-12 font-bold"
+                disabled={!tempName.trim()}
+              >
+                Simpan & Lanjut Kuis
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="mt-auto py-10 text-muted-foreground text-sm font-medium">
           © 2024 LearnScape - LKPD DIGITAL INTERAKTIF.
