@@ -2,18 +2,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   BookOpen, 
   HelpCircle, 
-  Users, 
-  Settings, 
   LogOut,
   GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
@@ -23,6 +23,13 @@ const NAV_ITEMS = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [_, setIsAdminLoggedIn] = useLocalStorage<boolean>("is_admin_logged_in", false);
+
+  const handleLogout = () => {
+    setIsAdminLoggedIn(false);
+    router.push("/");
+  };
 
   return (
     <div className="w-64 h-screen border-r bg-card flex flex-col fixed left-0 top-0 z-50">
@@ -59,13 +66,14 @@ export function AdminSidebar() {
       </nav>
 
       <div className="p-4">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-destructive hover:bg-destructive/10"
+        <Button
+          variant="ghost"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl transition-all font-medium text-destructive hover:bg-destructive/10"
         >
           <LogOut className="h-5 w-5" />
           Keluar (View Siswa)
-        </Link>
+        </Button>
       </div>
     </div>
   );

@@ -7,17 +7,25 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, ShieldCheck, ArrowLeft, Lock } from "lucide-react";
+import { ShieldCheck, ArrowLeft, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export default function LoginPage() {
   const [password, setPassword] = useState("");
+  const [_, setIsAdminLoggedIn] = useLocalStorage<boolean>("is_admin_logged_in", false);
   const router = useRouter();
   const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    // Simulasi password admin sederhana
     if (password === "admin123") {
+      setIsAdminLoggedIn(true);
+      toast({
+        title: "Login Berhasil",
+        description: "Selamat datang di Dashboard Pengajar.",
+      });
       router.push("/admin/dashboard");
     } else {
       toast({
