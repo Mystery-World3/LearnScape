@@ -2,62 +2,49 @@
 "use client";
 
 import Link from "next/link";
-import { GraduationCap, Moon, Sun, Monitor } from "lucide-react";
+import { GraduationCap, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const root = window.document.documentElement;
     if (theme === "dark") root.classList.add("dark");
-    else if (theme === "light") root.classList.remove("dark");
-    else {
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) root.classList.add("dark");
-      else root.classList.remove("dark");
-    }
+    else root.classList.remove("dark");
   }, [theme]);
 
+  const toggleTheme = () => {
+    setTheme(prev => prev === "light" ? "dark" : "light");
+  };
+
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 h-16 flex items-center justify-between">
+    <nav className="w-full px-6 md:px-12 h-20 flex items-center justify-between bg-transparent">
       <div className="flex items-center gap-2">
         <Link href="/admin/login" className="flex items-center gap-2 group">
           <div className="bg-primary p-2 rounded-lg transition-transform group-hover:scale-110">
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="font-headline font-bold text-xl tracking-tight text-primary">LearnScape</span>
+          <span className="font-headline font-bold text-2xl tracking-tight text-[#3b49df] dark:text-primary">
+            Learn<span className="text-[#facc15]">Scape</span>
+          </span>
         </Link>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1 bg-secondary p-1 rounded-full border">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("h-8 w-8 rounded-full", theme === "light" && "bg-background shadow-sm")}
-            onClick={() => setTheme("light")}
-          >
-            <Sun className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("h-8 w-8 rounded-full", theme === "system" && "bg-background shadow-sm")}
-            onClick={() => setTheme("system")}
-          >
-            <Monitor className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("h-8 w-8 rounded-full", theme === "dark" && "bg-background shadow-sm")}
-            onClick={() => setTheme("dark")}
-          >
-            <Moon className="h-4 w-4" />
-          </Button>
-        </div>
+      <div className="flex items-center gap-6">
+        <span className="hidden md:block text-sm italic text-muted-foreground font-medium">
+          Interactive Digital Learning Platform
+        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full bg-secondary/50"
+          onClick={toggleTheme}
+        >
+          {theme === "light" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </Button>
       </div>
     </nav>
   );
