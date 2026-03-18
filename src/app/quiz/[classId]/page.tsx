@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -13,6 +12,7 @@ import { ChevronRight, ChevronLeft, Send, CheckCircle2 } from "lucide-react";
 import { MOCK_QUESTIONS, MOCK_CLASSES } from "@/lib/mock-data";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Question, QuizResult } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export default function QuizPage() {
   const { classId } = useParams();
@@ -35,7 +35,7 @@ export default function QuizPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>(new Array(classQuestions.length).fill(-1));
 
-  const progress = ((currentIndex + 1) / classQuestions.length) * 100;
+  const progress = classQuestions.length > 0 ? ((currentIndex + 1) / classQuestions.length) * 100 : 0;
   const currentQuestion = classQuestions[currentIndex];
 
   const handleSelectOption = (index: number) => {
@@ -82,7 +82,7 @@ export default function QuizPage() {
 
   if (classQuestions.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <h2 className="text-2xl font-bold mb-4">Maaf, kelas ini belum memiliki pertanyaan.</h2>
         <Button onClick={() => router.push('/')}>Kembali ke Beranda</Button>
       </div>
@@ -93,7 +93,7 @@ export default function QuizPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 flex flex-col items-center justify-center p-6 max-w-3xl mx-auto w-full">
-        <div className="w-full mb-8 space-y-4">
+        <div className="w-full mb-8 space-y-4 animate-fade-in">
           <div className="flex justify-between items-end">
             <div>
               <h2 className="text-primary font-bold uppercase tracking-wider text-sm">{className}</h2>
@@ -107,74 +107,78 @@ export default function QuizPage() {
           <Progress value={progress} className="h-3" />
         </div>
 
-        <Card className="w-full shadow-lg border-primary/5">
-          <CardHeader>
-            <CardTitle className="text-xl leading-relaxed text-balance">
+        <Card className="w-full shadow-2xl border-none rounded-[2rem] overflow-hidden animate-fade-in">
+          <CardHeader className="pt-8 px-8">
+            <CardTitle className="text-xl md:text-2xl leading-relaxed text-balance font-headline">
               {currentQuestion.statement}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-8 pb-8">
             <RadioGroup 
               value={answers[currentIndex].toString()} 
               onValueChange={(val) => handleSelectOption(parseInt(val))}
-              className="space-y-3"
+              className="space-y-4"
             >
               {currentQuestion.options.map((option, idx) => (
                 <Label
                   key={idx}
                   htmlFor={`option-${idx}`}
                   className={cn(
-                    "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-secondary/50",
+                    "flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all hover:bg-secondary/50",
                     answers[currentIndex] === idx ? "border-primary bg-primary/5" : "border-muted"
                   )}
                 >
                   <RadioGroupItem value={idx.toString()} id={`option-${idx}`} className="sr-only" />
                   <div className={cn(
-                    "h-8 w-8 flex items-center justify-center rounded-full border-2 text-sm font-bold",
-                    answers[currentIndex] === idx ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"
+                    "h-10 w-10 shrink-0 flex items-center justify-center rounded-full border-2 text-base font-bold transition-colors",
+                    answers[currentIndex] === idx ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30 text-muted-foreground"
                   )}>
                     {String.fromCharCode(65 + idx)}
                   </div>
-                  <span className="text-base font-medium">{option}</span>
+                  <span className="text-lg font-medium">{option}</span>
                 </Label>
               ))}
             </RadioGroup>
           </CardContent>
-          <CardFooter className="flex justify-between pt-6 border-t">
+          <CardFooter className="flex justify-between p-8 border-t bg-secondary/10">
             <Button 
-              variant="outline" 
+              variant="ghost" 
               onClick={handlePrev} 
               disabled={currentIndex === 0}
-              className="gap-2"
+              className="gap-2 h-12 px-6 rounded-xl font-bold"
             >
-              <ChevronLeft className="h-4 w-4" /> Sebelumnya
+              <ChevronLeft className="h-5 w-5" /> Sebelumnya
             </Button>
             
             {currentIndex === classQuestions.length - 1 ? (
               <Button 
                 onClick={handleSubmit} 
-                className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground"
+                className="gap-2 bg-[#facc15] hover:bg-[#eab308] text-black h-12 px-8 rounded-xl font-bold shadow-lg shadow-yellow-500/20"
                 disabled={answers.some(a => a === -1)}
               >
-                Selesaikan Kuis <CheckCircle2 className="h-4 w-4" />
+                Selesaikan Kuis <CheckCircle2 className="h-5 w-5" />
               </Button>
             ) : (
-              <Button onClick={handleNext} className="gap-2" disabled={answers[currentIndex] === -1}>
-                Selanjutnya <ChevronRight className="h-4 w-4" />
+              <Button 
+                onClick={handleNext} 
+                className="gap-2 bg-[#3b49df] hover:bg-[#2f3ab2] text-white h-12 px-8 rounded-xl font-bold" 
+                disabled={answers[currentIndex] === -1}
+              >
+                Selanjutnya <ChevronRight className="h-5 w-5" />
               </Button>
             )}
           </CardFooter>
         </Card>
         
-        <div className="mt-8 flex gap-2 overflow-x-auto pb-4 w-full justify-center">
+        <div className="mt-8 flex gap-3 overflow-x-auto pb-6 w-full justify-center scrollbar-hide">
           {classQuestions.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
               className={cn(
-                "h-10 w-10 shrink-0 rounded-lg font-bold border-2 transition-all",
-                currentIndex === idx ? "border-primary bg-primary text-primary-foreground scale-110 shadow-md" : 
-                answers[idx] !== -1 ? "border-accent bg-accent/10 text-accent" : "border-muted text-muted-foreground"
+                "h-12 w-12 shrink-0 rounded-xl font-bold border-2 transition-all flex items-center justify-center",
+                currentIndex === idx ? "border-primary bg-primary text-primary-foreground scale-110 shadow-xl" : 
+                answers[idx] !== -1 ? "border-[#facc15] bg-[#facc15]/10 text-[#eab308]" : "border-muted bg-white text-muted-foreground"
               )}
             >
               {idx + 1}
