@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -21,17 +22,21 @@ export default function AdminDashboard() {
 
   const isLoading = classesLoading || resultsLoading;
 
-  const totalParticipants = results?.length || 0;
-  const avgScore = results?.length ? Math.round(results.reduce((acc, curr) => acc + curr.score, 0) / results.length) : 0;
+  // Safe data extraction
+  const safeResults = results || [];
+  const safeClasses = classes || [];
+
+  const totalParticipants = safeResults.length;
+  const avgScore = totalParticipants ? Math.round(safeResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / totalParticipants) : 0;
   
-  const classStats = classes?.map(c => {
-    const classResults = results?.filter(r => r.classId === c.id) || [];
+  const classStats = safeClasses.map(c => {
+    const classResults = safeResults.filter(r => r.classId === c.id);
     return {
       name: c.name,
       count: classResults.length,
-      avg: classResults.length ? Math.round(classResults.reduce((acc, curr) => acc + curr.score, 0) / classResults.length) : 0
+      avg: classResults.length ? Math.round(classResults.reduce((acc, curr) => acc + (curr.score || 0), 0) / classResults.length) : 0
     };
-  }) || [];
+  });
 
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
 
@@ -77,7 +82,7 @@ export default function AdminDashboard() {
         <Card className="border-none shadow-xl bg-white dark:bg-card">
           <CardHeader className="pb-2">
             <BookOpen className="h-8 w-8 text-primary opacity-50 mb-2" />
-            <CardTitle className="text-4xl font-headline text-foreground">{classes?.length || 0}</CardTitle>
+            <CardTitle className="text-4xl font-headline text-foreground">{safeClasses.length}</CardTitle>
             <CardDescription className="font-medium">Kelas Aktif</CardDescription>
           </CardHeader>
         </Card>
@@ -147,8 +152,8 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {results?.slice(-5).reverse().map((r, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/40 border">
+            {safeResults.slice().sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 5).map((r, i) => (
+              <div key={r.id || i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/40 border">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
                     {r.studentName ? r.studentName.charAt(0) : "?"}
@@ -156,18 +161,18 @@ export default function AdminDashboard() {
                   <div>
                     <div className="font-bold">{r.studentName || "Siswa Tanpa Nama"}</div>
                     <div className="text-xs text-muted-foreground">
-                      {classes?.find(c => c.id === r.classId)?.name} • {new Date(r.timestamp).toLocaleDateString()}
+                      {safeClasses.find(c => c.id === r.classId)?.name || "Kelas N/A"} • {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : "-"}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <Badge className={cn(r.score >= 70 ? "bg-primary" : "bg-destructive")}>
-                    {r.score}%
+                  <Badge className={cn((r.score || 0) >= 70 ? "bg-primary" : "bg-destructive")}>
+                    {r.score || 0}%
                   </Badge>
                 </div>
               </div>
             ))}
-            {(!results || results.length === 0) && (
+            {safeResults.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 Belum ada aktivitas kuis.
               </div>
