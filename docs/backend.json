@@ -1,0 +1,238 @@
+{
+  "entities": {
+    "Class": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Class",
+      "type": "object",
+      "description": "Represents a course or subject that students can select and teachers can manage, containing associated quizzes and questions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Class entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the class (e.g., 'Mathematics Grade 5', 'Algebra I')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the class content or curriculum."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The timestamp indicating when the class record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The timestamp indicating when the class record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Question": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Question",
+      "type": "object",
+      "description": "Represents a single math question associated with a class, including its problem statement, answer choices, and solution.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Question entity."
+        },
+        "classId": {
+          "type": "string",
+          "description": "Reference to the Class this question belongs to. (Relationship: Class 1:N Question)"
+        },
+        "problemStatement": {
+          "type": "string",
+          "description": "The full text or content of the math problem presented to the student."
+        },
+        "options": {
+          "type": "array",
+          "description": "An ordered list of possible answer choices for the question.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "correctAnswerIndex": {
+          "type": "number",
+          "description": "The zero-based index of the correct answer within the 'options' array."
+        },
+        "solutionExplanation": {
+          "type": "string",
+          "description": "Detailed step-by-step explanation or method to solve the problem, displayed during review."
+        },
+        "difficultyLevel": {
+          "type": "string",
+          "description": "An indicator of the question's difficulty (e.g., 'easy', 'medium', 'hard')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The timestamp indicating when the question record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The timestamp indicating when the question record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "classId",
+        "problemStatement",
+        "options",
+        "correctAnswerIndex",
+        "solutionExplanation",
+        "difficultyLevel",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "QuizAttempt": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "QuizAttempt",
+      "type": "object",
+      "description": "Records a student's submission for a quiz, including their name, selected class, all submitted answers, and the final score.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the QuizAttempt entity."
+        },
+        "classId": {
+          "type": "string",
+          "description": "Reference to the Class for which this quiz attempt was made. (Relationship: Class 1:N QuizAttempt)"
+        },
+        "studentName": {
+          "type": "string",
+          "description": "The name provided by the student at the time of taking the quiz."
+        },
+        "attemptDateTime": {
+          "type": "string",
+          "description": "The timestamp indicating when the student submitted this quiz attempt.",
+          "format": "date-time"
+        },
+        "score": {
+          "type": "number",
+          "description": "The final numerical score obtained by the student for this quiz attempt."
+        },
+        "totalQuestions": {
+          "type": "number",
+          "description": "The total number of questions presented in this quiz attempt."
+        },
+        "correctAnswersCount": {
+          "type": "number",
+          "description": "The number of questions answered correctly by the student in this attempt."
+        },
+        "submittedAnswers": {
+          "type": "array",
+          "description": "An array detailing each question answered, the student's selected answer index, and its correctness.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "classId",
+        "studentName",
+        "attemptDateTime",
+        "score",
+        "totalQuestions",
+        "correctAnswersCount",
+        "submittedAnswers"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/teachers/{teacherId}",
+        "definition": {
+          "entityName": "Teacher",
+          "schema": {
+            "$ref": "#/backend/entities/Teacher"
+          },
+          "description": "A conceptual collection used solely for Database Access Control (DBAC). The existence of a document at this path signifies that the corresponding user (identified by {teacherId}, which is their Firebase Auth UID) has teacher privileges. Includes denormalized 'uid' and 'assignedAt' for auditing if desired, but existence alone determines authorization.",
+          "params": [
+            {
+              "name": "teacherId",
+              "description": "The unique Firebase Authentication UID of the teacher."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/classes/{classId}",
+        "definition": {
+          "entityName": "Class",
+          "schema": {
+            "$ref": "#/backend/entities/Class"
+          },
+          "description": "Stores information about each class (course). Accessible for read operations by all users (including unauthenticated students for selection). Writable and manageable only by authenticated teachers. Includes 'creatorId' (UID of the creating teacher) for auditing.",
+          "params": [
+            {
+              "name": "classId",
+              "description": "The unique identifier for the class."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/classes/{classId}/questions/{questionId}",
+        "definition": {
+          "entityName": "Question",
+          "schema": {
+            "$ref": "#/backend/entities/Question"
+          },
+          "description": "Contains math questions associated with a specific class. These documents are managed (CRUD) exclusively by authenticated teachers. Students can read these questions during a quiz. Includes denormalized 'classId' for consistency, though implied by the path.",
+          "params": [
+            {
+              "name": "classId",
+              "description": "The unique identifier of the parent class."
+            },
+            {
+              "name": "questionId",
+              "description": "The unique identifier for the question."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/classes/{classId}/quizAttempts/{quizAttemptId}",
+        "definition": {
+          "entityName": "QuizAttempt",
+          "schema": {
+            "$ref": "#/backend/entities/QuizAttempt"
+          },
+          "description": "Records individual student quiz submissions for a specific class. Students (anonymous or authenticated) can create these documents. Teachers have read access to all quiz attempts for all classes for performance tracking. Includes denormalized 'classId' for consistency, though implied by the path.",
+          "params": [
+            {
+              "name": "classId",
+              "description": "The unique identifier of the parent class."
+            },
+            {
+              "name": "quizAttemptId",
+              "description": "The unique identifier for the quiz attempt."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for LearnScape is designed with a strong emphasis on Authorization Independence, Structural Segregation, and DBAC, while facilitating QAPs for both students and teachers.\n\n**Authorization Independence via Denormalization:**\n\n1.  **Global Teacher Role:** A top-level collection, `/teachers/{teacherId}`, is introduced to implement Database Access Control (DBAC). The *existence* of a document at `/teachers/$(request.auth.uid)` grants global teacher privileges across the application. This eliminates any need for `get()` calls to a parent document to determine if a user is authorized to manage content. All operations requiring teacher access (CRUD for classes and questions, reading quiz attempts) will simply check this role collection directly. This adheres to Authorization Independence by decoupling authorization from hierarchical data dependencies.\n\n2.  **Collection-Level Ownership/Access:**\n    *   The `/classes/{classId}` collection holds all class definitions. While a `creatorId` (UID of the teacher who created it) can be stored within the `Class` document for auditing, authorization for managing these classes (CRUD) is based on the global teacher role (`/teachers/{teacherId}`). This means *any* authenticated teacher can manage *any* class, fulfilling the \"Teacher Content Management\" requirement without complex per-class permissions.\n    *   `Question` documents are nested within `/classes/{classId}/questions/{questionId}`. Their access control for management (CRUD) is solely determined by the `request.auth.uid` being present in `/teachers/{teacherId}`, not by checking attributes of the parent `Class` document. This ensures authorization independence for questions.\n    *   `QuizAttempt` documents are similarly nested under `/classes/{classId}/quizAttempts/{quizAttemptId}`. Student creation of these attempts is allowed for anonymous users (`request.auth.uid == null`), and teacher read access is based on the global teacher role. No `get()` calls to the parent `Class` document are needed for authorizing quiz attempt operations.\n\n**QAPs (Rules are not Filters) and Structural Segregation:**\n\n1.  **Student Class Selection:** The `/classes/{classId}` collection is made publicly readable (e.g., `allow read: if request.auth.uid == null;` for anonymous access). This allows students to efficiently list and select classes from the landing page without requiring authentication or complex rule filtering, directly supporting the \"Student Class Selection & Quiz Flow\" feature. All documents in this collection share the same security posture (public read for students, teacher write for management).\n\n2.  **Teacher Content Management:** The `/classes/{classId}/questions/{questionId}` subcollection allows teachers (verified via `/teachers/{teacherId}`) to perform CRUD operations. This design ensures that all questions within a class share the same security posture (teacher management, student quiz-time access). The `classId` in the path provides a natural partitioning for listing questions for a specific class, without needing server-side filtering.\n\n3.  **Student Performance Tracking:** The `/classes/{classId}/quizAttempts/{quizAttemptId}` subcollection stores all quiz attempts. Teachers (verified via `/teachers/{teacherId}`) have read access to all documents in this collection, enabling them to monitor student performance across all classes. Students (anonymous) can create documents in this collection. This structure isolates quiz attempts by class, enabling efficient queries for performance tracking without exposing sensitive data inappropriately or relying on rule filtering for `list` operations.\n\nBy centralizing role-based authorization and segregating data based on access patterns, the security rules will be simple to write, robust against accidental data exposure, and easy to debug. The explicit use of paths for `classId` ensures predictable data organization and supports efficient querying."
+  }
+}
