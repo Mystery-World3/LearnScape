@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -12,6 +11,7 @@ import { MOCK_QUESTIONS, MOCK_CLASSES } from "@/lib/mock-data";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { QuizResult, Question } from "@/lib/types";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 export default function ResultsPage() {
   const searchParams = useSearchParams();

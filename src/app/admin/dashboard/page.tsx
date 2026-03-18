@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -8,6 +7,8 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie }
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { QuizResult, Class } from "@/lib/types";
 import { MOCK_RESULTS, MOCK_CLASSES } from "@/lib/mock-data";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
   const [results] = useLocalStorage<QuizResult[]>("quiz_results", MOCK_RESULTS);
@@ -133,10 +134,10 @@ export default function AdminDashboard() {
               <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/40 border">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
-                    {r.studentName.charAt(0)}
+                    {r.studentName ? r.studentName.charAt(0) : "?"}
                   </div>
                   <div>
-                    <div className="font-bold">{r.studentName}</div>
+                    <div className="font-bold">{r.studentName || "Siswa Tanpa Nama"}</div>
                     <div className="text-xs text-muted-foreground">
                       {classes.find(c => c.id === r.classId)?.name} • {new Date(r.timestamp).toLocaleDateString()}
                     </div>
