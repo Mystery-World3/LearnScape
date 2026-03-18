@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Users, Target, BookOpen, TrendingUp, Loader2, AlertTriangle, CheckCircle2, Filter } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from "recharts";
+import { Users, Target, BookOpen, TrendingUp, Loader2, AlertTriangle, CheckCircle2, Filter, HelpCircle, ListChecks } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from "recharts";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, collectionGroup } from "firebase/firestore";
-import { QuizResult, Class } from "@/lib/types";
+import { QuizResult, Class, Question } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
@@ -27,11 +28,15 @@ export default function AdminDashboard() {
   const resultsQuery = useMemoFirebase(() => collectionGroup(firestore, "quizAttempts"), [firestore]);
   const { data: results, isLoading: resultsLoading, error: resultsError } = useCollection<QuizResult>(resultsQuery);
 
-  const isLoading = !mounted || classesLoading || resultsLoading;
-  const hasError = !!classesError || !!resultsError;
+  const questionsQuery = useMemoFirebase(() => collectionGroup(firestore, "questions"), [firestore]);
+  const { data: allQuestions, isLoading: questionsLoading, error: questionsError } = useCollection<Question>(questionsQuery);
+
+  const isLoading = !mounted || classesLoading || resultsLoading || questionsLoading;
+  const hasError = !!classesError || !!resultsError || !!questionsError;
 
   const safeResults = useMemo(() => Array.isArray(results) ? results : [], [results]);
   const safeClasses = useMemo(() => Array.isArray(classes) ? classes : [], [classes]);
+  const safeQuestions = useMemo(() => Array.isArray(allQuestions) ? allQuestions : [], [allQuestions]);
 
   const filteredResults = useMemo(() => {
     if (filterClassId === "all") return safeResults;
@@ -39,6 +44,9 @@ export default function AdminDashboard() {
   }, [safeResults, filterClassId]);
 
   const totalParticipants = filteredResults.length;
+  const totalQuestions = safeQuestions.length;
+  const activeClassesCount = safeClasses.filter(c => c.isActive).length;
+
   const avgScore = useMemo(() => {
     if (totalParticipants === 0) return 0;
     const total = filteredResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
@@ -49,18 +57,21 @@ export default function AdminDashboard() {
     if (!safeClasses.length) return [];
     const baseStats = safeClasses.map(c => {
       const classResults = safeResults.filter(r => r?.classId === c?.id);
+      const classQuestionsCount = safeQuestions.filter(q => q.classId === c.id).length;
       const totalScore = classResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
       return {
         id: c.id,
         name: c?.name || "Materi",
+        isActive: c.isActive,
         count: classResults.length,
+        questionCount: classQuestionsCount,
         avg: classResults.length ? Math.round(totalScore / classResults.length) : 0
       };
     });
 
     if (filterClassId === "all") return baseStats;
     return baseStats.filter(s => s.id === filterClassId);
-  }, [safeClasses, safeResults, filterClassId]);
+  }, [safeClasses, safeResults, safeQuestions, filterClassId]);
 
   const sortedRecentResults = useMemo(() => {
     if (!filteredResults.length) return [];
@@ -86,7 +97,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-headline font-bold">Ringkasan Statistik</h1>
-          <p className="text-muted-foreground">Monitor performa siswa secara real-time.</p>
+          <p className="text-muted-foreground">Monitor performa siswa dan ketersediaan soal secara real-time.</p>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
@@ -104,11 +115,6 @@ export default function AdminDashboard() {
               </SelectContent>
             </Select>
           </div>
-          
-          <div className="bg-primary/10 px-4 py-2 rounded-full border border-primary/20 flex items-center gap-2 shrink-0">
-            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm font-bold text-primary">Sistem Online</span>
-          </div>
         </div>
       </div>
 
@@ -117,7 +123,7 @@ export default function AdminDashboard() {
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle className="font-bold">Konfigurasi Database Diperlukan</AlertTitle>
           <AlertDescription>
-            Terjadi kendala saat memuat data. Periksa koneksi atau index Firebase Anda.
+            Terjadi kendala saat memuat data. Periksa konsol browser (F12) untuk melihat apakah ada Index Firebase yang perlu diaktifkan.
           </AlertDescription>
         </Alert>
       )}
@@ -135,18 +141,18 @@ export default function AdminDashboard() {
 
         <Card className="border-none shadow-xl bg-accent text-accent-foreground overflow-hidden relative">
           <div className="absolute right-[-10%] top-[-10%] opacity-10 rotate-12">
-            <Target size={120} />
+            <HelpCircle size={120} />
           </div>
           <CardHeader className="pb-2 relative z-10">
-            <CardTitle className="text-5xl font-headline">{avgScore}%</CardTitle>
-            <CardDescription className="text-accent-foreground font-bold opacity-80">Rata-rata Skor</CardDescription>
+            <CardTitle className="text-5xl font-headline">{totalQuestions}</CardTitle>
+            <CardDescription className="text-accent-foreground font-bold opacity-80">Total Soal</CardDescription>
           </CardHeader>
         </Card>
 
         <Card className="border shadow-xl bg-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-5xl font-headline text-primary">
-              {filterClassId === "all" ? safeClasses.length : 1}
+              {activeClassesCount}
             </CardTitle>
             <CardDescription className="font-bold text-muted-foreground">Materi Aktif</CardDescription>
           </CardHeader>
@@ -154,25 +160,23 @@ export default function AdminDashboard() {
 
         <Card className="border shadow-xl bg-card">
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2 mb-1">
-               <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
-               <span className="text-xs font-bold text-green-500 uppercase">Live</span>
-            </div>
-            <CardTitle className="text-3xl font-headline">Sinkron</CardTitle>
-            <CardDescription className="font-bold text-muted-foreground">Status Database</CardDescription>
+            <CardTitle className="text-5xl font-headline text-[#facc15]">
+              {avgScore}%
+            </CardTitle>
+            <CardDescription className="font-bold text-muted-foreground">Rata-rata Skor</CardDescription>
           </CardHeader>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="shadow-2xl bg-card border">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="lg:col-span-2 shadow-2xl bg-card border">
           <CardHeader>
             <CardTitle className="font-headline text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               Performa Nilai (%)
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px] w-full pt-4">
+          <CardContent className="h-[350px] w-full pt-4">
              {classStats.length > 0 ? (
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={classStats}>
@@ -194,37 +198,39 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-2xl bg-card border">
-          <CardHeader>
-            <CardTitle className="font-headline text-lg">Distribusi Peserta</CardTitle>
+        <Card className="shadow-2xl bg-card border overflow-hidden">
+          <CardHeader className="bg-secondary/20">
+            <CardTitle className="font-headline text-lg flex items-center gap-2">
+              <ListChecks className="h-5 w-5 text-primary" />
+              Detail Soal per Kelas
+            </CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px] w-full pt-4">
-             {classStats.some(s => s.count > 0) ? (
-               <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={classStats}
-                      dataKey="count"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label={({ name }) => name}
-                      stroke="hsl(var(--card))"
-                      strokeWidth={2}
-                    >
-                      {classStats.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-               </ResponsiveContainer>
-             ) : (
-               <div className="h-full flex items-center justify-center text-muted-foreground text-sm italic">
-                 Belum ada data partisipasi.
-               </div>
-             )}
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nama Kelas</TableHead>
+                  <TableHead className="text-right">Soal</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {classStats.filter(s => s.isActive).map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-medium text-xs">{s.name}</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant="secondary">{s.questionCount}</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {classStats.filter(s => s.isActive).length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center py-10 text-muted-foreground italic text-xs">
+                      Tidak ada kelas aktif.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
@@ -235,7 +241,7 @@ export default function AdminDashboard() {
             <CheckCircle2 className="h-5 w-5 text-green-500" />
             Aktivitas Terakhir
           </CardTitle>
-          <CardDescription>Siswa yang baru saja menyelesaikan kuis dalam filter ini</CardDescription>
+          <CardDescription>Siswa yang baru saja menyelesaikan kuis</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
