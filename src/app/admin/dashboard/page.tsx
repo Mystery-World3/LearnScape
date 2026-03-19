@@ -38,13 +38,19 @@ export default function AdminDashboard() {
   const safeClasses = useMemo(() => Array.isArray(classes) ? classes : [], [classes]);
   const safeQuestions = useMemo(() => Array.isArray(allQuestions) ? allQuestions : [], [allQuestions]);
 
+  // Perbaikan: Hanya hitung soal yang kelasnya masih ada di database
+  const validQuestions = useMemo(() => {
+    const classIds = new Set(safeClasses.map(c => c.id));
+    return safeQuestions.filter(q => q.classId && classIds.has(q.classId));
+  }, [safeQuestions, safeClasses]);
+
   const filteredResults = useMemo(() => {
     if (filterClassId === "all") return safeResults;
     return safeResults.filter(r => r.classId === filterClassId);
   }, [safeResults, filterClassId]);
 
   const totalParticipants = filteredResults.length;
-  const totalQuestions = safeQuestions.length;
+  const totalQuestions = validQuestions.length; // Sekarang menggunakan validQuestions
   const activeClassesCount = safeClasses.filter(c => c.isActive).length;
 
   const avgScore = useMemo(() => {
@@ -57,7 +63,7 @@ export default function AdminDashboard() {
     if (!safeClasses.length) return [];
     return safeClasses.map(c => {
       const classResults = safeResults.filter(r => r?.classId === c?.id);
-      const classQuestionsCount = safeQuestions.filter(q => q.classId === c.id).length;
+      const classQuestionsCount = validQuestions.filter(q => q.classId === c.id).length;
       const totalScore = classResults.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
       return {
         id: c.id,
@@ -68,7 +74,7 @@ export default function AdminDashboard() {
         avg: classResults.length ? Math.round(totalScore / classResults.length) : 0
       };
     }).sort((a, b) => b.avg - a.avg);
-  }, [safeClasses, safeResults, safeQuestions]);
+  }, [safeClasses, safeResults, validQuestions]);
 
   const sortedRecentResults = useMemo(() => {
     if (!filteredResults.length) return [];
@@ -91,7 +97,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-3xl md:text-4xl font-headline font-black tracking-tight">Ringkasan Statistik</h1>
@@ -124,7 +129,6 @@ export default function AdminDashboard() {
         </Alert>
       )}
 
-      {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: "Total Peserta", val: totalParticipants, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
@@ -147,7 +151,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Performa Chart */}
         <Card className="lg:col-span-2 shadow-xl border-none rounded-[2rem] overflow-hidden">
           <CardHeader className="bg-secondary/10 border-b pb-4">
             <CardTitle className="font-headline text-xl flex items-center gap-3">
@@ -194,7 +197,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Sebaran Soal Table */}
         <Card className="shadow-xl border-none rounded-[2rem] overflow-hidden">
           <CardHeader className="bg-secondary/10 border-b">
             <CardTitle className="font-headline text-xl flex items-center gap-3">
@@ -232,7 +234,6 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Recent Activity Section */}
       <Card className="shadow-xl border-none rounded-[2.5rem] overflow-hidden">
         <CardHeader className="bg-primary/5 border-b p-8">
           <CardTitle className="font-headline text-2xl flex items-center gap-4">
