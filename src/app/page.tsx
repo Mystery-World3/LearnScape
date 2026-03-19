@@ -95,17 +95,6 @@ export default function LandingPage() {
                       {!isLoading && <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />}
                     </Button>
                   )}
-                  
-                  {studentName && activeClasses.length > 0 && (
-                    <div className="text-center mt-4">
-                      <button 
-                        onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
-                        className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-primary/30"
-                      >
-                        Bukan {studentName}? Klik untuk ganti nama
-                      </button>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
