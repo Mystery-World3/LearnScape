@@ -52,28 +52,28 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#f0f2f9] dark:bg-background flex flex-col">
       <Navbar />
       
-      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-3xl w-full space-y-8 animate-fade-in">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 text-center">
+        <div className="max-w-3xl w-full space-y-6 md:space-y-8 animate-fade-in">
           <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-headline font-bold leading-tight text-[#3b49df] dark:text-primary">
+            <h1 className="text-4xl md:text-7xl font-headline font-bold leading-tight text-[#3b49df] dark:text-primary">
               Belajar Jadi Lebih <br />
               <span className="text-[#facc15]">Menyenangkan</span>
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-              Akses Lembar Kerja Peserta Didik (LKPD) digital interaktif untuk menunjang proses pembelajaranmu di mana saja dan kapan saja.
+            <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto leading-relaxed px-4">
+              Akses Lembar Kerja Peserta Didik (LKPD) digital interaktif untuk menunjang proses pembelajaranmu.
             </p>
           </div>
 
-          <Card className="max-w-md mx-auto shadow-2xl border-none rounded-[2rem] overflow-hidden p-2">
-            <CardContent className="pt-8 pb-8 space-y-8">
-              <div className="flex items-center justify-center gap-2 text-[#3b49df] font-bold text-lg">
-                <GraduationCap className="h-6 w-6" />
+          <Card className="max-w-md mx-auto shadow-xl md:shadow-2xl border-none rounded-[1.5rem] md:rounded-[2rem] overflow-hidden p-2">
+            <CardContent className="pt-6 pb-6 md:pt-8 md:pb-8 space-y-6 md:space-y-8">
+              <div className="flex items-center justify-center gap-2 text-[#3b49df] font-bold text-base md:text-lg">
+                <GraduationCap className="h-5 w-5 md:h-6 md:w-6" />
                 <span>Pilih Kelas Kamu</span>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 px-2 md:px-0">
                 <Select onValueChange={setSelectedClass} value={selectedClass} disabled={isLoading}>
-                  <SelectTrigger className="h-14 bg-[#eef0f7] dark:bg-secondary border-none rounded-xl text-base px-6">
+                  <SelectTrigger className="h-12 md:h-14 bg-[#eef0f7] dark:bg-secondary border-none rounded-xl text-sm md:text-base px-4 md:px-6">
                     <SelectValue placeholder={isLoading ? "Memuat kelas..." : "Pilih jenjang kelas..."} />
                   </SelectTrigger>
                   <SelectContent>
@@ -82,17 +82,12 @@ export default function LandingPage() {
                         {c.name}
                       </SelectItem>
                     ))}
-                    {activeClasses.length === 0 && !isLoading && (
-                      <div className="p-4 text-sm text-muted-foreground text-center italic">
-                        Belum ada kelas aktif yang tersedia saat ini.
-                      </div>
-                    )}
                   </SelectContent>
                 </Select>
 
                 {activeClasses.length > 0 && (
                   <Button 
-                    className="w-full h-14 text-lg font-bold gap-2 rounded-xl bg-[#98a3e0] hover:bg-[#3b49df] text-white transition-all group"
+                    className="w-full h-12 md:h-14 text-base md:text-lg font-bold gap-2 rounded-xl bg-[#98a3e0] hover:bg-[#3b49df] text-white transition-all group"
                     disabled={!selectedClass || isLoading}
                     onClick={handleStartQuiz}
                   >
@@ -104,7 +99,7 @@ export default function LandingPage() {
                 {studentName && activeClasses.length > 0 && (
                   <button 
                     onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
-                    className="text-xs text-muted-foreground hover:text-primary transition-colors underline"
+                    className="text-[10px] md:text-xs text-muted-foreground hover:text-primary transition-colors underline"
                   >
                     Bukan {studentName}? Ubah Nama
                   </button>
@@ -112,19 +107,10 @@ export default function LandingPage() {
               </div>
             </CardContent>
           </Card>
-          
-          {activeClasses.length === 0 && !isLoading && (
-            <Alert className="max-w-md mx-auto border-dashed">
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Hubungi Bapak/Ibu Guru untuk mengaktifkan kuis kelasmu.
-              </AlertDescription>
-            </Alert>
-          )}
         </div>
 
         <Dialog open={isNameDialogOpen} onOpenChange={setIsNameDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="w-[90vw] max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
@@ -151,7 +137,7 @@ export default function LandingPage() {
             <DialogFooter>
               <Button 
                 onClick={handleSaveNameAndStart} 
-                className="w-full h-12 font-bold"
+                className="w-full h-12 font-bold rounded-xl"
                 disabled={!tempName.trim()}
               >
                 Simpan & Lanjut Kuis
@@ -160,7 +146,7 @@ export default function LandingPage() {
           </DialogContent>
         </Dialog>
 
-        <div className="mt-auto py-10 text-muted-foreground text-sm font-medium">
+        <div className="mt-auto py-8 md:py-10 text-muted-foreground text-[10px] md:text-sm font-medium">
           © 2024 LearnScape - LKPD DIGITAL INTERAKTIF.
         </div>
       </main>

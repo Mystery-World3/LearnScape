@@ -93,18 +93,18 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
+    <div className="space-y-6 md:space-y-8 animate-fade-in pb-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-headline font-bold">Ringkasan Statistik</h1>
-          <p className="text-muted-foreground">Monitor performa siswa dan ketersediaan soal secara real-time.</p>
+          <h1 className="text-3xl md:text-4xl font-headline font-bold">Ringkasan Statistik</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Monitor performa siswa secara real-time.</p>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
           <div className="flex items-center gap-2 bg-card p-2 rounded-xl border shadow-sm w-full sm:w-auto">
             <Filter className="h-4 w-4 text-muted-foreground ml-2" />
             <Select value={filterClassId} onValueChange={setFilterClassId}>
-              <SelectTrigger className="w-[180px] border-none shadow-none focus:ring-0">
+              <SelectTrigger className="w-full sm:w-[180px] border-none shadow-none focus:ring-0">
                 <SelectValue placeholder="Semua Kelas" />
               </SelectTrigger>
               <SelectContent>
@@ -123,64 +123,58 @@ export default function AdminDashboard() {
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle className="font-bold">Konfigurasi Database Diperlukan</AlertTitle>
           <AlertDescription>
-            Terjadi kendala saat memuat data. Periksa konsol browser (F12) untuk melihat apakah ada Index Firebase yang perlu diaktifkan.
+            Terjadi kendala saat memuat data. Periksa konsol browser (F12) untuk mengaktifkan Index.
           </AlertDescription>
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-none shadow-xl bg-primary text-primary-foreground overflow-hidden relative">
-          <div className="absolute right-[-10%] top-[-10%] opacity-10 rotate-12">
-            <Users size={120} />
-          </div>
-          <CardHeader className="pb-2 relative z-10">
-            <CardTitle className="text-5xl font-headline">{totalParticipants}</CardTitle>
-            <CardDescription className="text-primary-foreground font-bold opacity-80">Peserta Terfilter</CardDescription>
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <Card className="border-none shadow-lg bg-primary text-primary-foreground overflow-hidden relative">
+          <CardHeader className="p-4 md:p-6 pb-2 relative z-10">
+            <CardTitle className="text-3xl md:text-5xl font-headline">{totalParticipants}</CardTitle>
+            <CardDescription className="text-primary-foreground text-xs md:text-sm font-bold opacity-80">Peserta</CardDescription>
           </CardHeader>
         </Card>
 
-        <Card className="border-none shadow-xl bg-accent text-accent-foreground overflow-hidden relative">
-          <div className="absolute right-[-10%] top-[-10%] opacity-10 rotate-12">
-            <HelpCircle size={120} />
-          </div>
-          <CardHeader className="pb-2 relative z-10">
-            <CardTitle className="text-5xl font-headline">{totalQuestions}</CardTitle>
-            <CardDescription className="text-accent-foreground font-bold opacity-80">Total Soal</CardDescription>
+        <Card className="border-none shadow-lg bg-accent text-accent-foreground overflow-hidden relative">
+          <CardHeader className="p-4 md:p-6 pb-2 relative z-10">
+            <CardTitle className="text-3xl md:text-5xl font-headline">{totalQuestions}</CardTitle>
+            <CardDescription className="text-accent-foreground text-xs md:text-sm font-bold opacity-80">Total Soal</CardDescription>
           </CardHeader>
         </Card>
 
-        <Card className="border shadow-xl bg-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-5xl font-headline text-primary">
+        <Card className="border shadow-lg bg-card">
+          <CardHeader className="p-4 md:p-6 pb-2">
+            <CardTitle className="text-3xl md:text-5xl font-headline text-primary">
               {activeClassesCount}
             </CardTitle>
-            <CardDescription className="font-bold text-muted-foreground">Materi Aktif</CardDescription>
+            <CardDescription className="text-xs md:text-sm font-bold text-muted-foreground">Aktif</CardDescription>
           </CardHeader>
         </Card>
 
-        <Card className="border shadow-xl bg-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-5xl font-headline text-[#facc15]">
+        <Card className="border shadow-lg bg-card">
+          <CardHeader className="p-4 md:p-6 pb-2">
+            <CardTitle className="text-3xl md:text-5xl font-headline text-[#facc15]">
               {avgScore}%
             </CardTitle>
-            <CardDescription className="font-bold text-muted-foreground">Rata-rata Skor</CardDescription>
+            <CardDescription className="text-xs md:text-sm font-bold text-muted-foreground">Rerata</CardDescription>
           </CardHeader>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 shadow-2xl bg-card border">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <Card className="lg:col-span-2 shadow-xl bg-card border">
           <CardHeader>
             <CardTitle className="font-headline text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               Performa Nilai (%)
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-[350px] w-full pt-4">
+          <CardContent className="h-[250px] md:h-[350px] w-full pt-4">
              {classStats.length > 0 ? (
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={classStats}>
-                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
+                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} hide={classStats.length > 5} />
                     <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
                     <Tooltip cursor={{fill: 'rgba(0,0,0,0.05)'}} />
                     <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
@@ -198,78 +192,65 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-2xl bg-card border overflow-hidden">
+        <Card className="shadow-xl bg-card border overflow-hidden">
           <CardHeader className="bg-secondary/20">
             <CardTitle className="font-headline text-lg flex items-center gap-2">
               <ListChecks className="h-5 w-5 text-primary" />
-              Detail Soal per Kelas
+              Detail Soal
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nama Kelas</TableHead>
+                  <TableHead>Kelas</TableHead>
                   <TableHead className="text-right">Soal</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {classStats.filter(s => s.isActive).map((s) => (
                   <TableRow key={s.id}>
-                    <TableCell className="font-medium text-xs">{s.name}</TableCell>
+                    <TableCell className="font-medium text-xs max-w-[120px] truncate">{s.name}</TableCell>
                     <TableCell className="text-right">
                       <Badge variant="secondary">{s.questionCount}</Badge>
                     </TableCell>
                   </TableRow>
                 ))}
-                {classStats.filter(s => s.isActive).length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center py-10 text-muted-foreground italic text-xs">
-                      Tidak ada kelas aktif.
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="shadow-2xl bg-card border overflow-hidden">
+      <Card className="shadow-xl bg-card border overflow-hidden">
         <CardHeader className="bg-secondary/30 border-b">
-          <CardTitle className="font-headline flex items-center gap-2">
+          <CardTitle className="font-headline text-base md:text-lg flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-green-500" />
             Aktivitas Terakhir
           </CardTitle>
-          <CardDescription>Siswa yang baru saja menyelesaikan kuis</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
             {sortedRecentResults.map((r, i) => (
-              <div key={r.id || i} className="flex items-center justify-between p-5 hover:bg-secondary/10 transition-colors">
-                <div className="flex items-center gap-4 overflow-hidden">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0 border border-primary/20">
+              <div key={r.id || i} className="flex items-center justify-between p-4 md:p-5 hover:bg-secondary/10 transition-colors">
+                <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0 border border-primary/20 text-sm md:text-base">
                     {r?.studentName ? r.studentName.charAt(0).toUpperCase() : "?"}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-bold text-lg leading-tight truncate">{r?.studentName || "Siswa"}</div>
-                    <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                      {safeClasses.find(c => c.id === r.classId)?.name || "Kuis"} • {r?.timestamp ? new Date(r.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : "-"}
+                    <div className="font-bold text-sm md:text-lg leading-tight truncate">{r?.studentName || "Siswa"}</div>
+                    <div className="text-[10px] md:text-xs text-muted-foreground font-medium uppercase truncate">
+                      {safeClasses.find(c => c.id === r.classId)?.name || "Kuis"}
                     </div>
                   </div>
                 </div>
-                <div className="text-right shrink-0 ml-4">
-                  <Badge className={cn("text-lg px-4 py-1", (Number(r?.score) || 0) >= 70 ? "bg-green-500 text-white" : "bg-destructive text-white")}>
+                <div className="text-right shrink-0 ml-2">
+                  <Badge className={cn("text-sm md:text-lg px-2 md:px-4 py-1", (Number(r?.score) || 0) >= 70 ? "bg-green-500 text-white" : "bg-destructive text-white")}>
                     {r?.score || 0}%
                   </Badge>
                 </div>
               </div>
             ))}
-            {sortedRecentResults.length === 0 && (
-              <div className="text-center py-20 text-muted-foreground italic">
-                Belum ada aktivitas kuis terbaru.
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

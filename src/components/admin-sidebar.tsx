@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { label: "Manajemen Nilai", icon: Trophy, href: "/admin/results" },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ isMobile }: { isMobile?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [_, setIsAdminLoggedIn] = useLocalStorage<boolean>("is_admin_logged_in", false);
@@ -46,8 +46,11 @@ export function AdminSidebar() {
     router.push("/");
   };
 
-  return (
-    <div className="w-64 h-screen border-r bg-card flex flex-col fixed left-0 top-0 z-50">
+  const content = (
+    <div className={cn(
+      "h-full bg-card flex flex-col",
+      !isMobile && "w-64 border-r fixed left-0 top-0 z-50"
+    )}>
       <div className="p-6">
         <Link href="/" className="flex items-center gap-3">
           <div className="bg-primary p-2 rounded-lg">
@@ -73,7 +76,7 @@ export function AdminSidebar() {
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium",
               pathname === item.href 
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105" 
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
                 : "text-muted-foreground hover:bg-secondary hover:text-foreground"
             )}
           >
@@ -95,4 +98,6 @@ export function AdminSidebar() {
       </div>
     </div>
   );
+
+  return content;
 }
