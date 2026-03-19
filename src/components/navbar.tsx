@@ -3,14 +3,10 @@
 import Link from "next/link";
 import { GraduationCap, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useFirebase } from "@/firebase";
 
 export function Navbar() {
-  const [theme, setTheme] = useLocalStorage<"light" | "dark">("app-theme", "light");
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
+  const { theme, toggleTheme } = useFirebase();
 
   return (
     <nav className="w-full px-6 md:px-12 h-20 flex items-center justify-between bg-transparent z-50">

@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Button } from "@/components/ui/button";
+import { useFirebase } from "@/firebase";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
@@ -28,11 +29,7 @@ export function AdminSidebar({ isMobile }: { isMobile?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [_, setIsAdminLoggedIn] = useLocalStorage<boolean>("is_admin_logged_in", false);
-  const [theme, setTheme] = useLocalStorage<"light" | "dark">("app-theme", "light");
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
+  const { theme, toggleTheme } = useFirebase();
 
   const handleLogout = () => {
     setIsAdminLoggedIn(false);
