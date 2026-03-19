@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { GraduationCap, Moon, Sun } from "lucide-react";
+import { GraduationCap, Moon, Sun, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFirebase } from "@/firebase";
 
@@ -21,18 +21,31 @@ export function Navbar() {
         </Link>
       </div>
 
-      <div className="flex items-center gap-6">
-        <span className="hidden md:block text-sm italic text-muted-foreground font-medium">
-          Interactive Digital Learning Platform
-        </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full bg-secondary/50 h-10 w-10 hover:bg-primary/20 transition-colors"
-          onClick={toggleTheme}
+      <div className="flex items-center gap-4 md:gap-8">
+        <Link 
+          href="/admin/login" 
+          className="hidden md:flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors group"
         >
-          {theme === "light" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
+          <ShieldCheck className="h-4 w-4 group-hover:animate-bounce" />
+          Panel Guru
+        </Link>
+        
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full bg-secondary/50 h-10 w-10 hover:bg-primary/20 transition-colors"
+            onClick={toggleTheme}
+          >
+            {theme === "light" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+          
+          <Link href="/admin/login" className="md:hidden">
+            <Button variant="ghost" size="icon" className="rounded-full bg-secondary/50 h-10 w-10">
+              <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </nav>
   );
