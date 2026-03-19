@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -27,8 +26,8 @@ export function Navbar() {
           <div className="bg-primary p-2 rounded-lg transition-transform group-hover:scale-110">
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="font-headline font-bold text-2xl tracking-tight text-[#3b49df] dark:text-primary">
-            Learn<span className="text-[#facc15]">Scape</span>
+          <span className="font-headline font-bold text-2xl tracking-tight text-primary">
+            Learn<span className="text-accent">Scape</span>
           </span>
         </Link>
       </div>

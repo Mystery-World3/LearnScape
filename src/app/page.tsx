@@ -56,7 +56,7 @@ export default function LandingPage() {
           <div className="space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <h1 className="text-5xl md:text-8xl font-headline font-bold leading-none text-primary tracking-tight">
               Belajar Jadi Lebih <br />
-              <span className="text-[#facc15] inline-block hover:scale-105 transition-transform duration-300 cursor-default">Menyenangkan</span>
+              <span className="text-accent inline-block hover:scale-105 transition-transform duration-300 cursor-default">Menyenangkan</span>
             </h1>
             <p className="text-muted-foreground text-base md:text-xl max-w-2xl mx-auto leading-relaxed px-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.4s' }}>
               Akses Lembar Kerja Peserta Didik (LKPD) digital interaktif untuk menunjang proses pembelajaranmu di sekolah.

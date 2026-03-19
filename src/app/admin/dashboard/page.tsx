@@ -81,7 +81,7 @@ export default function AdminDashboard() {
       .slice(0, 5);
   }, [filteredResults]);
 
-  const COLORS = ['#3b49df', '#facc15', '#10b981', '#f43f5e', '#8b5cf6'];
+  const COLORS = ['#3b49df', '#2563eb', '#10b981', '#1d4ed8', '#8b5cf6'];
 
   if (isLoading) {
     return (
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
           <AlertTriangle className="h-6 w-6" />
           <AlertTitle className="font-black text-lg">Konfigurasi Database Diperlukan</AlertTitle>
           <AlertDescription className="text-base">
-            Terjadi kendala saat memuat data. Periksa konsol browser (F12) untuk mengaktifkan Index Firestore.
+            Terjadi kendala saat memuat data. Periksa konsol browser (F12) dan klik tautan yang disediakan oleh Firebase untuk membuat index secara otomatis.
           </AlertDescription>
         </Alert>
       )}
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
           { label: "Total Peserta", val: totalParticipants, color: "bg-primary text-primary-foreground", shadow: "shadow-primary/20" },
           { label: "Total Soal", val: totalQuestions, color: "bg-accent text-accent-foreground", shadow: "shadow-accent/20" },
           { label: "Kelas Aktif", val: activeClassesCount, color: "bg-card border-2", shadow: "shadow-black/5", textColor: "text-primary" },
-          { label: "Rerata Skor", val: `${avgScore}%`, color: "bg-card border-2", shadow: "shadow-black/5", textColor: "text-[#eab308]" }
+          { label: "Rerata Skor", val: `${avgScore}%`, color: "bg-card border-2", shadow: "shadow-black/5", textColor: "text-accent" }
         ].map((stat, i) => (
           <Card key={i} className={cn("border-none shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-1 overflow-hidden", stat.color, stat.shadow)}>
             <CardHeader className="p-6 md:p-8 relative z-10">

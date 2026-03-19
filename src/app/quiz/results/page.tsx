@@ -61,7 +61,7 @@ function ResultsContent() {
           <div className="relative inline-block">
              <div className="absolute inset-0 bg-primary/30 blur-[60px] rounded-full scale-150 animate-pulse" />
              <div className="relative z-10 bg-white dark:bg-card p-6 rounded-full shadow-2xl border-4 border-primary/20 animate-bounce-subtle">
-               <Award className="h-24 w-24 md:h-32 md:w-32 text-[#facc15] drop-shadow-lg" />
+               <Award className="h-24 w-24 md:h-32 md:w-32 text-accent drop-shadow-lg" />
              </div>
           </div>
           <div className="space-y-2">
@@ -222,7 +222,7 @@ function ResultsContent() {
           <Button 
             onClick={() => router.push('/')} 
             size="lg" 
-            className="px-16 h-18 text-2xl font-black rounded-full shadow-2xl shadow-primary/30 hover:scale-110 active:scale-95 transition-all duration-300 bg-primary hover:bg-[#2f3ab2]"
+            className="px-16 h-18 text-2xl font-black rounded-full shadow-2xl shadow-primary/30 hover:scale-110 active:scale-95 transition-all duration-300 bg-primary hover:bg-primary/90"
           >
             Selesai Belajar
           </Button>

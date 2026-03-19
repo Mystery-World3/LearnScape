@@ -215,7 +215,7 @@ export default function QuizPage() {
                 {currentIndex === (classQuestions?.length || 0) - 1 ? (
                   <Button 
                     onClick={handleSubmit} 
-                    className="gap-3 bg-[#facc15] hover:bg-[#eab308] text-black h-14 md:h-20 px-8 md:px-12 rounded-2xl font-bold text-lg md:text-2xl shadow-xl shadow-yellow-500/20 hover:scale-105 active:scale-95 transition-all"
+                    className="gap-3 bg-primary hover:bg-primary/90 text-primary-foreground h-14 md:h-20 px-8 md:px-12 rounded-2xl font-bold text-lg md:text-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
                     disabled={!isCurrentAnswered || Object.keys(answers).length < (classQuestions?.length || 0)}
                   >
                     Kirim Jawaban <Send className="h-6 w-6 md:h-8 md:w-8" />
@@ -223,7 +223,7 @@ export default function QuizPage() {
                 ) : (
                   <Button 
                     onClick={handleNext} 
-                    className="gap-3 bg-[#3b49df] hover:bg-[#2f3ab2] text-white h-14 md:h-20 px-8 md:px-12 rounded-2xl font-bold text-lg md:text-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all" 
+                    className="gap-3 bg-accent hover:bg-accent/90 text-accent-foreground h-14 md:h-20 px-8 md:px-12 rounded-2xl font-bold text-lg md:text-2xl shadow-xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all" 
                     disabled={!isCurrentAnswered}
                   >
                     Lanjut <ChevronRight className="h-6 w-6 md:h-8 md:w-8" />
@@ -244,7 +244,7 @@ export default function QuizPage() {
                 currentIndex === idx 
                   ? "border-primary bg-primary text-primary-foreground scale-110 shadow-xl shadow-primary/20 z-10" 
                   : answers[idx] !== undefined && answers[idx] !== "" 
-                    ? "border-[#facc15] bg-[#facc15]/10 text-[#eab308]" 
+                    ? "border-accent bg-accent/10 text-accent" 
                     : "border-secondary bg-white dark:bg-card text-muted-foreground opacity-50"
               )}
             >
