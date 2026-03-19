@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
@@ -29,16 +29,19 @@ export function AdminSidebar({ isMobile }: { isMobile?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [_, setIsAdminLoggedIn] = useLocalStorage<boolean>("is_admin_logged_in", false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useLocalStorage<"light" | "dark">("app-theme", "light");
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === "dark") root.classList.add("dark");
-    else root.classList.remove("dark");
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === "light" ? "dark" : "light");
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const handleLogout = () => {
@@ -60,8 +63,8 @@ export function AdminSidebar({ isMobile }: { isMobile?: boolean }) {
         </Link>
         <div className="mt-2 px-1 flex justify-between items-center">
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">Admin Panel</span>
-          <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={toggleTheme}>
-             {theme === "light" ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-secondary/50" onClick={toggleTheme}>
+             {theme === "light" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
         </div>
       </div>

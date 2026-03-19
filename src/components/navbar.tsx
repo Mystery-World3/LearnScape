@@ -3,20 +3,23 @@
 import Link from "next/link";
 import { GraduationCap, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export function Navbar() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useLocalStorage<"light" | "dark">("app-theme", "light");
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === "dark") root.classList.add("dark");
-    else root.classList.remove("dark");
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === "light" ? "dark" : "light");
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
@@ -39,7 +42,7 @@ export function Navbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full bg-secondary/50"
+          className="rounded-full bg-secondary/50 h-10 w-10"
           onClick={toggleTheme}
         >
           {theme === "light" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
