@@ -4,36 +4,36 @@
 
 @layer base {
   :root {
-    /* Mode Terang - Kontras Tinggi Maksimal */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 2%;
+    /* Mode Terang - Kontras Tinggi */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 2%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 2%;
+    --popover-foreground: 222 47% 11%;
     --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 222 47% 2%;
-    --muted: 210 20% 94%;
-    --muted-foreground: 215 16% 35%;
-    --accent: 199 89% 48%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 92%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 221 83% 45%; /* Dipergelap agar teks putih terlihat jelas */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 85%;
-    --input: 214 32% 85%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
     --ring: 221 83% 53%;
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   .dark {
-    /* Mode Gelap - Hitam Pekat dengan Kontras Tinggi */
+    /* Mode Gelap - Hitam Pekat Kontras Tinggi */
     --background: 222 47% 2%;
     --foreground: 210 40% 98%;
     --card: 222 47% 4%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 3%;
+    --popover: 222 47% 4%;
     --popover-foreground: 210 40% 98%;
     --primary: 217 91% 60%;
     --primary-foreground: 222 47% 2%;
@@ -41,7 +41,7 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 222 47% 10%;
     --muted-foreground: 215 20% 85%;
-    --accent: 199 89% 55%;
+    --accent: 217 91% 60%;
     --accent-foreground: 222 47% 2%;
     --destructive: 0 62% 45%;
     --destructive-foreground: 210 40% 98%;

@@ -48,13 +48,13 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f2f9] dark:bg-background flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       <Navbar />
       
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 text-center">
         <div className="max-w-3xl w-full space-y-6 md:space-y-10">
           <div className="space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <h1 className="text-5xl md:text-8xl font-headline font-bold leading-none text-[#3b49df] dark:text-primary tracking-tight">
+            <h1 className="text-5xl md:text-8xl font-headline font-bold leading-none text-primary tracking-tight">
               Belajar Jadi Lebih <br />
               <span className="text-[#facc15] inline-block hover:scale-105 transition-transform duration-300 cursor-default">Menyenangkan</span>
             </h1>
@@ -64,21 +64,21 @@ export default function LandingPage() {
           </div>
 
           <div className="animate-scale-in opacity-0" style={{ animationDelay: '0.6s' }}>
-            <Card className="max-w-md mx-auto shadow-2xl border-none rounded-[2rem] overflow-hidden p-2 bg-white/80 dark:bg-card/80 backdrop-blur-sm hover:shadow-primary/10 transition-shadow duration-500">
+            <Card className="max-w-md mx-auto shadow-2xl border-none rounded-[2rem] overflow-hidden p-2 bg-card/80 backdrop-blur-sm hover:shadow-primary/10 transition-shadow duration-500">
               <CardContent className="pt-8 pb-8 space-y-8">
-                <div className="flex items-center justify-center gap-3 text-[#3b49df] dark:text-primary font-bold text-lg md:text-xl">
+                <div className="flex items-center justify-center gap-3 text-primary font-bold text-lg md:text-xl">
                   <GraduationCap className="h-6 w-6 md:h-7 md:w-7 animate-bounce" />
                   <span>Pilih Kelas Kamu</span>
                 </div>
 
-                <div className="space-y-4 px-2 md:px-0">
+                <div className="space-y-4 px-2 md:px-0 text-left">
                   <Select onValueChange={setSelectedClass} value={selectedClass} disabled={isLoading}>
-                    <SelectTrigger className="h-14 md:h-16 bg-[#eef0f7] dark:bg-secondary border-none rounded-2xl text-base md:text-lg px-6 shadow-inner focus:ring-2 focus:ring-primary/20">
+                    <SelectTrigger className="h-14 md:h-16 bg-secondary border-none rounded-2xl text-base md:text-lg px-6 shadow-inner focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder={isLoading ? "Memuat kelas..." : "Pilih jenjang kelas..."} />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl">
                       {activeClasses.map((c) => (
-                        <SelectItem key={c.id} value={c.id} className="h-12 focus:bg-primary/10">
+                        <SelectItem key={c.id} value={c.id} className="h-12 focus:bg-accent focus:text-accent-foreground cursor-pointer">
                           {c.name}
                         </SelectItem>
                       ))}
@@ -87,7 +87,7 @@ export default function LandingPage() {
 
                   {activeClasses.length > 0 && (
                     <Button 
-                      className="w-full h-14 md:h-16 text-lg md:text-xl font-bold gap-3 rounded-2xl bg-[#3b49df] hover:bg-[#2f3ab2] text-white shadow-xl hover:shadow-primary/30 transition-all duration-300 group hover:scale-[1.02] active:scale-95"
+                      className="w-full h-14 md:h-16 text-lg md:text-xl font-bold gap-3 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:shadow-primary/30 transition-all duration-300 group hover:scale-[1.02] active:scale-95 mt-2"
                       disabled={!selectedClass || isLoading}
                       onClick={handleStartQuiz}
                     >
@@ -97,12 +97,14 @@ export default function LandingPage() {
                   )}
                   
                   {studentName && activeClasses.length > 0 && (
-                    <button 
-                      onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
-                      className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-primary/30"
-                    >
-                      Bukan {studentName}? Klik untuk ganti nama
-                    </button>
+                    <div className="text-center mt-4">
+                      <button 
+                        onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
+                        className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-primary/30"
+                      >
+                        Bukan {studentName}? Klik untuk ganti nama
+                      </button>
+                    </div>
                   )}
                 </div>
               </CardContent>
