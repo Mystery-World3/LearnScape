@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
@@ -30,15 +29,6 @@ export function AdminSidebar({ isMobile }: { isMobile?: boolean }) {
   const router = useRouter();
   const [_, setIsAdminLoggedIn] = useLocalStorage<boolean>("is_admin_logged_in", false);
   const [theme, setTheme] = useLocalStorage<"light" | "dark">("app-theme", "light");
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -55,17 +45,19 @@ export function AdminSidebar({ isMobile }: { isMobile?: boolean }) {
       !isMobile && "w-64 border-r fixed left-0 top-0 z-50"
     )}>
       <div className="p-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="bg-primary p-2 rounded-lg">
-            <GraduationCap className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="font-headline font-bold text-xl tracking-tight">LearnScape</span>
-        </Link>
-        <div className="mt-2 px-1 flex justify-between items-center">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">Admin Panel</span>
+        <div className="flex items-center justify-between mb-2">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="bg-primary p-2 rounded-lg">
+              <GraduationCap className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="font-headline font-bold text-xl tracking-tight">LearnScape</span>
+          </Link>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-secondary/50" onClick={toggleTheme}>
              {theme === "light" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
+        </div>
+        <div className="px-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">Admin Panel</span>
         </div>
       </div>
 

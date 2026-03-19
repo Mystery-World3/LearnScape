@@ -3,29 +3,19 @@
 import Link from "next/link";
 import { GraduationCap, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export function Navbar() {
   const [theme, setTheme] = useLocalStorage<"light" | "dark">("app-theme", "light");
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
-    <nav className="w-full px-6 md:px-12 h-20 flex items-center justify-between bg-transparent">
+    <nav className="w-full px-6 md:px-12 h-20 flex items-center justify-between bg-transparent z-50">
       <div className="flex items-center gap-2">
-        <Link href="/admin/login" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-2 group">
           <div className="bg-primary p-2 rounded-lg transition-transform group-hover:scale-110">
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
@@ -42,7 +32,7 @@ export function Navbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full bg-secondary/50 h-10 w-10"
+          className="rounded-full bg-secondary/50 h-10 w-10 hover:bg-primary/20 transition-colors"
           onClick={toggleTheme}
         >
           {theme === "light" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
