@@ -9,12 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, ArrowRight, User, Loader2, Info } from "lucide-react";
+import { GraduationCap, ArrowRight, User, Loader2 } from "lucide-react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Class } from "@/lib/types";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -49,86 +48,90 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f2f9] dark:bg-background flex flex-col">
+    <div className="min-h-screen bg-[#f0f2f9] dark:bg-background flex flex-col overflow-x-hidden">
       <Navbar />
       
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 text-center">
-        <div className="max-w-3xl w-full space-y-6 md:space-y-8 animate-fade-in">
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-7xl font-headline font-bold leading-tight text-[#3b49df] dark:text-primary">
+        <div className="max-w-3xl w-full space-y-6 md:space-y-10">
+          <div className="space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-5xl md:text-8xl font-headline font-bold leading-none text-[#3b49df] dark:text-primary tracking-tight">
               Belajar Jadi Lebih <br />
-              <span className="text-[#facc15]">Menyenangkan</span>
+              <span className="text-[#facc15] inline-block hover:scale-105 transition-transform duration-300 cursor-default">Menyenangkan</span>
             </h1>
-            <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto leading-relaxed px-4">
-              Akses Lembar Kerja Peserta Didik (LKPD) digital interaktif untuk menunjang proses pembelajaranmu.
+            <p className="text-muted-foreground text-base md:text-xl max-w-2xl mx-auto leading-relaxed px-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              Akses Lembar Kerja Peserta Didik (LKPD) digital interaktif untuk menunjang proses pembelajaranmu di sekolah.
             </p>
           </div>
 
-          <Card className="max-w-md mx-auto shadow-xl md:shadow-2xl border-none rounded-[1.5rem] md:rounded-[2rem] overflow-hidden p-2">
-            <CardContent className="pt-6 pb-6 md:pt-8 md:pb-8 space-y-6 md:space-y-8">
-              <div className="flex items-center justify-center gap-2 text-[#3b49df] font-bold text-base md:text-lg">
-                <GraduationCap className="h-5 w-5 md:h-6 md:w-6" />
-                <span>Pilih Kelas Kamu</span>
-              </div>
+          <div className="animate-scale-in opacity-0" style={{ animationDelay: '0.6s' }}>
+            <Card className="max-w-md mx-auto shadow-2xl border-none rounded-[2rem] overflow-hidden p-2 bg-white/80 dark:bg-card/80 backdrop-blur-sm hover:shadow-primary/10 transition-shadow duration-500">
+              <CardContent className="pt-8 pb-8 space-y-8">
+                <div className="flex items-center justify-center gap-3 text-[#3b49df] dark:text-primary font-bold text-lg md:text-xl">
+                  <GraduationCap className="h-6 w-6 md:h-7 md:w-7 animate-bounce" />
+                  <span>Pilih Kelas Kamu</span>
+                </div>
 
-              <div className="space-y-4 px-2 md:px-0">
-                <Select onValueChange={setSelectedClass} value={selectedClass} disabled={isLoading}>
-                  <SelectTrigger className="h-12 md:h-14 bg-[#eef0f7] dark:bg-secondary border-none rounded-xl text-sm md:text-base px-4 md:px-6">
-                    <SelectValue placeholder={isLoading ? "Memuat kelas..." : "Pilih jenjang kelas..."} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activeClasses.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-4 px-2 md:px-0">
+                  <Select onValueChange={setSelectedClass} value={selectedClass} disabled={isLoading}>
+                    <SelectTrigger className="h-14 md:h-16 bg-[#eef0f7] dark:bg-secondary border-none rounded-2xl text-base md:text-lg px-6 shadow-inner focus:ring-2 focus:ring-primary/20">
+                      <SelectValue placeholder={isLoading ? "Memuat kelas..." : "Pilih jenjang kelas..."} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl">
+                      {activeClasses.map((c) => (
+                        <SelectItem key={c.id} value={c.id} className="h-12 focus:bg-primary/10">
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                {activeClasses.length > 0 && (
-                  <Button 
-                    className="w-full h-12 md:h-14 text-base md:text-lg font-bold gap-2 rounded-xl bg-[#98a3e0] hover:bg-[#3b49df] text-white transition-all group"
-                    disabled={!selectedClass || isLoading}
-                    onClick={handleStartQuiz}
-                  >
-                    {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "Mulai Belajar"}
-                    {!isLoading && <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />}
-                  </Button>
-                )}
-                
-                {studentName && activeClasses.length > 0 && (
-                  <button 
-                    onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
-                    className="text-[10px] md:text-xs text-muted-foreground hover:text-primary transition-colors underline"
-                  >
-                    Bukan {studentName}? Ubah Nama
-                  </button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  {activeClasses.length > 0 && (
+                    <Button 
+                      className="w-full h-14 md:h-16 text-lg md:text-xl font-bold gap-3 rounded-2xl bg-[#3b49df] hover:bg-[#2f3ab2] text-white shadow-xl hover:shadow-primary/30 transition-all duration-300 group hover:scale-[1.02] active:scale-95"
+                      disabled={!selectedClass || isLoading}
+                      onClick={handleStartQuiz}
+                    >
+                      {isLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Mulai Belajar"}
+                      {!isLoading && <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />}
+                    </Button>
+                  )}
+                  
+                  {studentName && activeClasses.length > 0 && (
+                    <button 
+                      onClick={() => { setTempName(studentName); setIsNameDialogOpen(true); }}
+                      className="text-xs md:text-sm text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-primary/30"
+                    >
+                      Bukan {studentName}? Klik untuk ganti nama
+                    </button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <Dialog open={isNameDialogOpen} onOpenChange={setIsNameDialogOpen}>
-          <DialogContent className="w-[90vw] max-w-md rounded-2xl">
+          <DialogContent className="w-[95vw] max-w-md rounded-3xl animate-scale-in">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
+              <DialogTitle className="flex items-center gap-3 text-2xl font-headline">
+                <div className="bg-primary/10 p-2 rounded-xl">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
                 Siapa namamu?
               </DialogTitle>
-              <DialogDescription>
-                Masukkan nama lengkapmu agar Bapak/Ibu Guru bisa mencatat nilaimu.
+              <DialogDescription className="text-base pt-2">
+                Masukkan nama lengkapmu agar Bapak/Ibu Guru bisa mencatat nilaimu ke dalam daftar hadir.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nama Lengkap</Label>
+            <div className="space-y-6 py-6">
+              <div className="space-y-3">
+                <Label htmlFor="name" className="text-base font-bold">Nama Lengkap Siswa</Label>
                 <Input 
                   id="name" 
                   value={tempName} 
                   onChange={(e) => setTempName(e.target.value)} 
                   placeholder="Contoh: Budi Santoso"
-                  className="h-12"
+                  className="h-14 text-lg rounded-2xl border-2 focus-visible:ring-primary/20"
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && handleSaveNameAndStart()}
                 />
@@ -137,7 +140,7 @@ export default function LandingPage() {
             <DialogFooter>
               <Button 
                 onClick={handleSaveNameAndStart} 
-                className="w-full h-12 font-bold rounded-xl"
+                className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg hover:shadow-primary/20 transition-all active:scale-95"
                 disabled={!tempName.trim()}
               >
                 Simpan & Lanjut Kuis
@@ -146,8 +149,8 @@ export default function LandingPage() {
           </DialogContent>
         </Dialog>
 
-        <div className="mt-auto py-8 md:py-10 text-muted-foreground text-[10px] md:text-sm font-medium">
-          © 2024 LearnScape - LKPD DIGITAL INTERAKTIF.
+        <div className="mt-auto py-10 text-muted-foreground text-xs md:text-sm font-medium opacity-60 animate-fade-in" style={{ animationDelay: '1s' }}>
+          © 2024 LearnScape - Platform LKPD Digital Interaktif
         </div>
       </main>
     </div>
