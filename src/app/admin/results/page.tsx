@@ -75,31 +75,31 @@ export default function ResultManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-headline font-black">Manajemen Nilai</h1>
-          <p className="text-muted-foreground font-medium">Pantau hasil belajar dan unduh laporan nilai siswa.</p>
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-headline font-black">Manajemen Nilai</h1>
+          <p className="text-muted-foreground text-sm font-medium">Pantau hasil belajar dan unduh laporan nilai siswa.</p>
         </div>
-        <Button onClick={exportToCSV} className="gap-2 rounded-xl shadow-lg h-12 px-6" variant="outline" disabled={filteredResults.length === 0}>
-          <Download className="h-5 w-5" /> Ekspor ke CSV (Excel)
+        <Button onClick={exportToCSV} className="w-full md:w-auto gap-2 rounded-xl shadow-lg h-11 md:h-12 px-6" variant="outline" disabled={filteredResults.length === 0}>
+          <Download className="h-5 w-5" /> Ekspor ke CSV
         </Button>
       </div>
 
-      <Card className="shadow-xl border-none rounded-[2rem] overflow-hidden">
-        <CardHeader className="bg-secondary/10 border-b p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+      <Card className="shadow-lg md:shadow-xl border-none rounded-[1.5rem] md:rounded-[2rem] overflow-hidden">
+        <CardHeader className="bg-secondary/10 border-b p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
                 placeholder="Cari nama siswa..." 
-                className="pl-12 h-12 rounded-xl border-2 focus:ring-primary/20" 
+                className="pl-12 h-11 md:h-12 rounded-xl border-2 focus:ring-primary/20 text-sm" 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)} 
               />
             </div>
-            <div className="flex items-center gap-2 bg-card p-1.5 px-4 rounded-xl border-2 transition-all hover:border-primary/50">
+            <div className="flex items-center gap-2 bg-card p-1 md:p-1.5 px-3 md:px-4 rounded-xl border-2 transition-all hover:border-primary/50">
                <Filter className="h-4 w-4 text-muted-foreground" />
                <Select value={filterClassId} onValueChange={setFilterClassId}>
-                 <SelectTrigger className="w-[200px] border-none shadow-none focus:ring-0 font-bold h-9">
+                 <SelectTrigger className="w-full md:w-[200px] border-none shadow-none focus:ring-0 font-bold h-9">
                    <SelectValue placeholder="Pilih Kelas" />
                  </SelectTrigger>
                  <SelectContent className="rounded-xl">
@@ -117,84 +117,86 @@ export default function ResultManagement() {
               Memuat data nilai...
             </div>
           ) : (
-            <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow>
-                  <TableHead className="px-8 font-black uppercase text-xs">Nama Siswa</TableHead>
-                  <TableHead className="font-black uppercase text-xs">Materi Kelas</TableHead>
-                  <TableHead className="font-black uppercase text-xs">Skor Akhir</TableHead>
-                  <TableHead className="font-black uppercase text-xs">Waktu Pengerjaan</TableHead>
-                  <TableHead className="text-right px-8 font-black uppercase text-xs">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredResults.map((r) => (
-                  <TableRow key={r.id} className="hover:bg-secondary/5 transition-colors">
-                    <TableCell className="px-8 py-4 font-bold">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                          <User className="h-4 w-4" />
-                        </div>
-                        {r.studentName}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-bold border-primary/20 bg-primary/5 text-primary">
-                        {classes?.find(c => c.id === r.classId)?.name || "Kuis Terhapus"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className={cn(
-                        "inline-flex items-center justify-center h-10 w-16 rounded-xl font-headline font-black text-lg",
-                        r.score >= 70 ? "bg-emerald-500 text-white" : "bg-destructive text-white"
-                      )}>
-                        {r.score}%
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm font-medium text-muted-foreground">
-                      {new Date(r.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </TableCell>
-                    <TableCell className="text-right px-8">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(r)} className="rounded-lg hover:bg-primary/10">
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive rounded-lg hover:bg-destructive/10" onClick={() => handleDelete(r)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredResults.length === 0 && (
+            <div className="overflow-x-auto scrollbar-hide">
+              <Table className="min-w-[700px]">
+                <TableHeader className="bg-muted/30">
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-20 text-muted-foreground italic font-medium">
-                      Belum ada data nilai terkumpul.
-                    </TableCell>
+                    <TableHead className="px-6 md:px-8 font-black uppercase text-[10px] md:text-xs">Nama Siswa</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] md:text-xs">Materi Kelas</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] md:text-xs">Skor Akhir</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] md:text-xs">Waktu</TableHead>
+                    <TableHead className="text-right px-6 md:px-8 font-black uppercase text-[10px] md:text-xs">Aksi</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredResults.map((r) => (
+                    <TableRow key={r.id} className="hover:bg-secondary/5 transition-colors">
+                      <TableCell className="px-6 md:px-8 py-4 font-bold text-sm md:text-base">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+                            <User className="h-4 w-4" />
+                          </div>
+                          <span className="truncate max-w-[150px]">{r.studentName}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-bold border-primary/20 bg-primary/5 text-primary text-[10px] md:text-xs truncate max-w-[150px]">
+                          {classes?.find(c => c.id === r.classId)?.name || "Kuis Terhapus"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className={cn(
+                          "inline-flex items-center justify-center h-8 w-12 md:h-10 md:w-16 rounded-lg md:rounded-xl font-headline font-black text-sm md:text-lg",
+                          r.score >= 70 ? "bg-emerald-500 text-white" : "bg-destructive text-white"
+                        )}>
+                          {r.score}%
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-[10px] md:text-sm font-medium text-muted-foreground whitespace-nowrap">
+                        {new Date(r.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </TableCell>
+                      <TableCell className="text-right px-6 md:px-8">
+                        <div className="flex justify-end gap-1 md:gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(r)} className="rounded-lg h-8 w-8 md:h-9 md:w-9 hover:bg-primary/10">
+                            <Edit2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-destructive rounded-lg h-8 w-8 md:h-9 md:w-9 hover:bg-destructive/10" onClick={() => handleDelete(r)}>
+                            <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredResults.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-20 text-muted-foreground italic font-medium text-sm">
+                        Belum ada data nilai terkumpul.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="rounded-[2rem]">
-          <DialogHeader><DialogTitle className="text-2xl font-headline font-black">Ubah Data Nilai</DialogTitle></DialogHeader>
+        <DialogContent className="rounded-[1.5rem] md:rounded-[2rem] max-w-[95vw] sm:max-w-md">
+          <DialogHeader><DialogTitle className="text-xl md:text-2xl font-headline font-black">Ubah Data Nilai</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="font-bold">Nama Lengkap Siswa</Label>
-              <Input value={formData.studentName} onChange={(e) => setFormData({ ...formData, studentName: e.target.value })} className="rounded-xl h-12" />
+              <Label className="font-bold text-sm">Nama Lengkap Siswa</Label>
+              <Input value={formData.studentName} onChange={(e) => setFormData({ ...formData, studentName: e.target.value })} className="rounded-xl h-12 text-sm" />
             </div>
             <div className="space-y-2">
-              <Label className="font-bold">Skor Hasil Akhir (%)</Label>
-              <Input type="number" value={formData.score} onChange={(e) => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })} className="rounded-xl h-12" />
+              <Label className="font-bold text-sm">Skor Hasil Akhir (%)</Label>
+              <Input type="number" value={formData.score} onChange={(e) => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })} className="rounded-xl h-12 text-sm" />
             </div>
           </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl">Batal</Button>
-            <Button onClick={handleSaveEdit} className="rounded-xl px-8">Simpan Perubahan</Button>
+          <DialogFooter className="flex flex-col md:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl w-full md:w-auto">Batal</Button>
+            <Button onClick={handleSaveEdit} className="rounded-xl px-8 w-full md:w-auto">Simpan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

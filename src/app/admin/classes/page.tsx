@@ -68,19 +68,19 @@ export default function ClassManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-headline font-black">Manajemen Kelas</h1>
-          <p className="text-muted-foreground font-medium">Aktifkan materi yang akan ditampilkan pada halaman siswa.</p>
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-headline font-black">Manajemen Kelas</h1>
+          <p className="text-muted-foreground text-sm font-medium">Aktifkan materi yang akan ditampilkan pada halaman siswa.</p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditingClass(null); setFormData({ name: "", description: "", isActive: true }); }} className="gap-2 rounded-xl shadow-lg shadow-primary/20">
+            <Button onClick={() => { setEditingClass(null); setFormData({ name: "", description: "", isActive: true }); }} className="w-full md:w-auto gap-2 rounded-xl h-12 shadow-lg shadow-primary/20">
               <Plus className="h-5 w-5" /> Tambah Kelas Baru
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-[2rem]">
+          <DialogContent className="rounded-[1.5rem] md:rounded-[2rem] max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-headline font-black">{editingClass ? "Edit Kelas" : "Tambah Kelas Baru"}</DialogTitle>
+              <DialogTitle className="text-xl md:text-2xl font-headline font-black">{editingClass ? "Edit Kelas" : "Tambah Kelas Baru"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -103,10 +103,10 @@ export default function ClassManagement() {
                   className="rounded-xl h-12"
                 />
               </div>
-              <div className="flex items-center justify-between p-4 border-2 rounded-2xl bg-muted/30">
+              <div className="flex items-center justify-between p-3 md:p-4 border-2 rounded-2xl bg-muted/30">
                 <div className="space-y-0.5">
                   <Label className="font-bold">Status Aktif</Label>
-                  <p className="text-xs text-muted-foreground font-medium">Tampilkan kelas ini di halaman siswa.</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground font-medium">Tampilkan kelas di halaman siswa.</p>
                 </div>
                 <Switch 
                   checked={formData.isActive} 
@@ -114,30 +114,30 @@ export default function ClassManagement() {
                 />
               </div>
             </div>
-            <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl">Batal</Button>
-              <Button onClick={handleSave} disabled={!formData.name} className="rounded-xl px-8">Simpan</Button>
+            <DialogFooter className="flex flex-col md:flex-row gap-2">
+              <Button variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl w-full md:w-auto">Batal</Button>
+              <Button onClick={handleSave} disabled={!formData.name} className="rounded-xl px-8 w-full md:w-auto">Simpan</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Card className="shadow-xl border-none rounded-[2rem] overflow-hidden">
-        <CardHeader className="bg-secondary/10 border-b p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+      <Card className="shadow-lg md:shadow-xl border-none rounded-[1.5rem] md:rounded-[2rem] overflow-hidden">
+        <CardHeader className="bg-secondary/10 border-b p-4 md:p-6">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
                 placeholder="Cari nama kelas..." 
-                className="pl-12 h-12 rounded-xl border-2 focus:ring-primary/20" 
+                className="pl-12 h-11 md:h-12 rounded-xl border-2 focus:ring-primary/20" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-2 bg-card p-1.5 px-4 rounded-xl border-2 transition-all hover:border-primary/50">
+            <div className="flex items-center gap-2 bg-card p-1 md:p-1.5 px-3 md:px-4 rounded-xl border-2 transition-all hover:border-primary/50">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[160px] border-none shadow-none focus:ring-0 font-bold h-9">
+                <SelectTrigger className="w-full md:w-[160px] border-none shadow-none focus:ring-0 font-bold h-9">
                   <SelectValue placeholder="Filter Status" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -156,60 +156,62 @@ export default function ClassManagement() {
               Memuat data kelas...
             </div>
           ) : (
-            <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow>
-                  <TableHead className="px-8 font-black uppercase text-xs">Nama Kelas</TableHead>
-                  <TableHead className="font-black uppercase text-xs">Status</TableHead>
-                  <TableHead className="font-black uppercase text-xs">Deskripsi</TableHead>
-                  <TableHead className="text-right px-8 font-black uppercase text-xs">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredClasses.map((c) => (
-                  <TableRow key={c.id} className="hover:bg-secondary/5 transition-colors">
-                    <TableCell className="px-8 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                          <BookOpen className="h-5 w-5" />
-                        </div>
-                        <span className="font-bold text-base">{c.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={c.isActive ? "default" : "secondary"} className={cn("rounded-lg px-3 py-1 font-bold", c.isActive ? "bg-emerald-500 hover:bg-emerald-600" : "opacity-60")}>
-                        {c.isActive ? "Aktif" : "Nonaktif"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground font-medium max-w-xs truncate">{c.description || "-"}</TableCell>
-                    <TableCell className="text-right px-8">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => toggleStatus(c)} title={c.isActive ? "Nonaktifkan" : "Aktifkan"} className="rounded-lg h-9 w-9">
-                          <Power className={cn("h-4 w-4", c.isActive ? "text-emerald-500" : "text-muted-foreground")} />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          setEditingClass(c);
-                          setFormData({ name: c.name, description: c.description || "", isActive: c.isActive });
-                          setIsOpen(true);
-                        }} className="rounded-lg h-9 w-9">
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive rounded-lg h-9 w-9 hover:bg-destructive/10" onClick={() => handleDelete(c.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredClasses.length === 0 && (
+            <div className="overflow-x-auto scrollbar-hide">
+              <Table className="min-w-[600px]">
+                <TableHeader className="bg-muted/30">
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-20 text-muted-foreground italic font-medium">
-                      Tidak ada kelas ditemukan.
-                    </TableCell>
+                    <TableHead className="px-6 md:px-8 font-black uppercase text-[10px] md:text-xs">Nama Kelas</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] md:text-xs">Status</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] md:text-xs">Deskripsi</TableHead>
+                    <TableHead className="text-right px-6 md:px-8 font-black uppercase text-[10px] md:text-xs">Aksi</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredClasses.map((c) => (
+                    <TableRow key={c.id} className="hover:bg-secondary/5 transition-colors">
+                      <TableCell className="px-6 md:px-8 py-4 md:py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
+                          </div>
+                          <span className="font-bold text-sm md:text-base truncate max-w-[200px]">{c.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={c.isActive ? "default" : "secondary"} className={cn("rounded-lg px-2 py-0.5 md:px-3 md:py-1 font-bold text-[10px] md:text-xs", c.isActive ? "bg-emerald-500 hover:bg-emerald-600" : "opacity-60")}>
+                          {c.isActive ? "Aktif" : "Nonaktif"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground font-medium text-xs md:text-sm max-w-xs truncate">{c.description || "-"}</TableCell>
+                      <TableCell className="text-right px-6 md:px-8">
+                        <div className="flex justify-end gap-1 md:gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => toggleStatus(c)} title={c.isActive ? "Nonaktifkan" : "Aktifkan"} className="rounded-lg h-8 w-8 md:h-9 md:w-9">
+                            <Power className={cn("h-4 w-4", c.isActive ? "text-emerald-500" : "text-muted-foreground")} />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            setEditingClass(c);
+                            setFormData({ name: c.name, description: c.description || "", isActive: c.isActive });
+                            setIsOpen(true);
+                          }} className="rounded-lg h-8 w-8 md:h-9 md:w-9">
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-destructive rounded-lg h-8 w-8 md:h-9 md:w-9 hover:bg-destructive/10" onClick={() => handleDelete(c.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredClasses.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-20 text-muted-foreground italic font-medium text-sm">
+                        Tidak ada kelas ditemukan.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -150,27 +150,27 @@ export default function QuestionManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-headline font-black">Manajemen Soal</h1>
-          <p className="text-muted-foreground font-medium">Buat variasi soal pilihan ganda, angka, atau isian teks.</p>
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-headline font-black">Manajemen Soal</h1>
+          <p className="text-muted-foreground text-sm font-medium">Buat variasi soal pilihan ganda, angka, atau isian teks.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2 rounded-xl h-12 shadow-sm">
-                <FileJson className="h-5 w-5" /> Impor Masal
+              <Button variant="outline" className="w-full sm:w-auto gap-2 rounded-xl h-11 md:h-12 shadow-sm">
+                <FileJson className="h-4 w-4 md:h-5 md:w-5" /> Impor Masal
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl rounded-[2rem]">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl rounded-[1.5rem] md:rounded-[2rem] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline font-black">Impor Masal Soal (JSON)</DialogTitle>
-                <DialogDescription className="font-medium">Masukkan data soal dalam format array JSON yang didukung.</DialogDescription>
+                <DialogTitle className="text-xl md:text-2xl font-headline font-black">Impor Masal Soal (JSON)</DialogTitle>
+                <DialogDescription className="text-xs md:text-sm font-medium">Masukkan data soal dalam format array JSON yang didukung.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label className="font-bold">Pilih Kelas Target</Label>
+                  <Label className="font-bold text-sm">Pilih Kelas Target</Label>
                   <Select value={bulkClassId} onValueChange={setBulkClassId}>
-                    <SelectTrigger className="rounded-xl h-12">
+                    <SelectTrigger className="rounded-xl h-11 md:h-12">
                       <SelectValue placeholder="Pilih Kelas..." />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
@@ -179,18 +179,18 @@ export default function QuestionManagement() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold">Data JSON</Label>
+                  <Label className="font-bold text-sm">Data JSON</Label>
                   <Textarea 
                     value={bulkData} 
                     onChange={(e) => setBulkData(e.target.value)} 
                     placeholder='[{"text": "Soal...", "type": "multiple-choice", "options": ["A", "B"], "correctAnswer": 0}]'
-                    className="font-mono text-xs h-64 rounded-xl border-2"
+                    className="font-mono text-[10px] md:text-xs h-64 rounded-xl border-2"
                   />
                 </div>
               </div>
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setIsBulkOpen(false)} className="rounded-xl">Batal</Button>
-                <Button onClick={handleBulkImport} disabled={!bulkClassId || !bulkData} className="rounded-xl px-8">Impor Sekarang</Button>
+              <DialogFooter className="flex flex-col md:flex-row gap-2">
+                <Button variant="outline" onClick={() => setIsBulkOpen(false)} className="rounded-xl w-full md:w-auto">Batal</Button>
+                <Button onClick={handleBulkImport} disabled={!bulkClassId || !bulkData} className="rounded-xl px-8 w-full md:w-auto">Impor Sekarang</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -200,29 +200,29 @@ export default function QuestionManagement() {
               <Button onClick={() => {
                 setEditingQuestion(null);
                 setFormData({ classId: "", type: "multiple-choice", statement: "", options: ["", "", "", ""], correctAnswerIndex: 0, correctAnswer: "", solutionSteps: [""] });
-              }} className="gap-2 rounded-xl h-12 shadow-lg shadow-primary/20">
-                <Plus className="h-5 w-5" /> Tambah Soal
+              }} className="w-full sm:w-auto gap-2 rounded-xl h-11 md:h-12 shadow-lg shadow-primary/20">
+                <Plus className="h-4 w-4 md:h-5 md:w-5" /> Tambah Soal
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem]">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-[1.5rem] md:rounded-[2.5rem]">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline font-black">{editingQuestion ? "Edit Pertanyaan" : "Buat Pertanyaan Baru"}</DialogTitle>
+                <DialogTitle className="text-xl md:text-2xl font-headline font-black">{editingQuestion ? "Edit Pertanyaan" : "Buat Pertanyaan Baru"}</DialogTitle>
               </DialogHeader>
-              <div className="space-y-6 py-4">
+              <div className="space-y-5 md:space-y-6 py-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="font-bold">Materi Kelas</Label>
+                    <Label className="font-bold text-sm">Materi Kelas</Label>
                     <Select value={formData.classId} onValueChange={(val) => setFormData({ ...formData, classId: val })}>
-                      <SelectTrigger className="rounded-xl h-12"><SelectValue placeholder="Pilih Kelas..." /></SelectTrigger>
+                      <SelectTrigger className="rounded-xl h-11 md:h-12"><SelectValue placeholder="Pilih Kelas..." /></SelectTrigger>
                       <SelectContent className="rounded-xl">
                         {classes?.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-bold">Tipe Soal</Label>
+                    <Label className="font-bold text-sm">Tipe Soal</Label>
                     <Select value={formData.type} onValueChange={(val: QuestionType) => setFormData({ ...formData, type: val })}>
-                      <SelectTrigger className="rounded-xl h-12"><SelectValue placeholder="Pilih Tipe..." /></SelectTrigger>
+                      <SelectTrigger className="rounded-xl h-11 md:h-12"><SelectValue placeholder="Pilih Tipe..." /></SelectTrigger>
                       <SelectContent className="rounded-xl">
                         <SelectItem value="multiple-choice">Pilihan Ganda</SelectItem>
                         <SelectItem value="number">Jawaban Angka</SelectItem>
@@ -233,81 +233,81 @@ export default function QuestionManagement() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="font-bold">Pernyataan Soal</Label>
-                  <Textarea value={formData.statement} onChange={(e) => setFormData({ ...formData, statement: e.target.value })} placeholder="Ketik soal di sini..." className="min-h-[120px] rounded-2xl border-2" />
+                  <Label className="font-bold text-sm">Pernyataan Soal</Label>
+                  <Textarea value={formData.statement} onChange={(e) => setFormData({ ...formData, statement: e.target.value })} placeholder="Ketik soal di sini..." className="min-h-[100px] md:min-h-[120px] rounded-2xl border-2 text-sm" />
                 </div>
 
                 {formData.type === "multiple-choice" ? (
-                  <div className="space-y-4">
-                    <Label className="font-bold">Opsi Jawaban (Klik lingkaran untuk kunci jawaban)</Label>
+                  <div className="space-y-3 md:space-y-4">
+                    <Label className="font-bold text-sm">Opsi Jawaban (Klik lingkaran untuk kunci)</Label>
                     {formData.options?.map((opt, idx) => (
-                      <div key={idx} className="flex gap-3 items-center">
+                      <div key={idx} className="flex gap-2 md:gap-3 items-center">
                         <button 
                           type="button" 
                           onClick={() => setFormData({ ...formData, correctAnswerIndex: idx })} 
                           className={cn(
-                            "h-10 w-10 shrink-0 rounded-2xl flex items-center justify-center border-2 transition-all", 
-                            formData.correctAnswerIndex === idx ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110" : "border-muted bg-muted/30"
+                            "h-9 w-9 md:h-10 md:w-10 shrink-0 rounded-xl md:rounded-2xl flex items-center justify-center border-2 transition-all", 
+                            formData.correctAnswerIndex === idx ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105" : "border-muted bg-muted/30"
                           )}
                         >
-                          {formData.correctAnswerIndex === idx ? <CheckCircle2 className="h-6 w-6" /> : <span className="font-black text-xs">{String.fromCharCode(65 + idx)}</span>}
+                          {formData.correctAnswerIndex === idx ? <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6" /> : <span className="font-black text-[10px] md:text-xs">{String.fromCharCode(65 + idx)}</span>}
                         </button>
-                        <Input value={opt} onChange={(e) => handleOptionChange(idx, e.target.value)} placeholder={`Pilihan ${String.fromCharCode(65 + idx)}`} className="h-12 rounded-xl" />
+                        <Input value={opt} onChange={(e) => handleOptionChange(idx, e.target.value)} placeholder={`Pilihan ${String.fromCharCode(65 + idx)}`} className="h-10 md:h-12 rounded-xl text-sm" />
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Label className="font-bold">Jawaban Benar ({formData.type === 'number' ? 'Hanya Angka' : 'Teks Bebas'})</Label>
+                    <Label className="font-bold text-sm">Jawaban Benar ({formData.type === 'number' ? 'Hanya Angka' : 'Teks Bebas'})</Label>
                     <Input 
                       type={formData.type === 'number' ? 'number' : 'text'}
                       value={formData.correctAnswer} 
                       onChange={(e) => setFormData({ ...formData, correctAnswer: e.target.value })} 
                       placeholder="Masukkan kunci jawaban..." 
-                      className="h-14 rounded-2xl border-2 border-primary/30 focus:border-primary"
+                      className="h-12 md:h-14 rounded-2xl border-2 border-primary/30 focus:border-primary text-sm"
                     />
                   </div>
                 )}
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <Label className="font-bold">Pembahasan Langkah-langkah</Label>
-                    <Button variant="ghost" size="sm" onClick={addStep} className="h-9 px-4 rounded-xl text-xs gap-2 bg-secondary/50 hover:bg-secondary"><Plus className="h-4 w-4" /> Tambah Langkah</Button>
+                    <Label className="font-bold text-sm">Pembahasan Langkah</Label>
+                    <Button variant="ghost" size="sm" onClick={addStep} className="h-8 md:h-9 px-3 md:px-4 rounded-xl text-[10px] md:text-xs gap-2 bg-secondary/50 hover:bg-secondary"><Plus className="h-3 w-3 md:h-4 md:w-4" /> Tambah</Button>
                   </div>
                   <div className="space-y-2">
                     {formData.solutionSteps.map((step, idx) => (
                       <div key={idx} className="flex gap-2">
-                        <div className="h-10 w-10 shrink-0 rounded-xl bg-muted flex items-center justify-center font-bold text-xs">{idx + 1}</div>
-                        <Input value={step} onChange={(e) => handleStepChange(idx, e.target.value)} placeholder="Tulis langkah penyelesaian..." className="h-10 rounded-xl" />
-                        <Button variant="ghost" size="icon" onClick={() => removeStep(idx)} className="rounded-xl h-10 w-10 text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        <div className="h-9 w-9 md:h-10 md:w-10 shrink-0 rounded-xl bg-muted flex items-center justify-center font-bold text-[10px] md:text-xs">{idx + 1}</div>
+                        <Input value={step} onChange={(e) => handleStepChange(idx, e.target.value)} placeholder="Langkah penyelesaian..." className="h-9 md:h-10 rounded-xl text-xs md:text-sm" />
+                        <Button variant="ghost" size="icon" onClick={() => removeStep(idx)} className="rounded-xl h-9 w-9 md:h-10 md:w-10 text-destructive"><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl">Batal</Button>
-                <Button onClick={handleSave} disabled={!formData.classId || !formData.statement} className="rounded-xl px-10">Simpan Soal</Button>
+              <DialogFooter className="flex flex-col md:flex-row gap-2">
+                <Button variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl w-full md:w-auto">Batal</Button>
+                <Button onClick={handleSave} disabled={!formData.classId || !formData.statement} className="rounded-xl px-10 w-full md:w-auto">Simpan Soal</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center bg-card p-4 rounded-3xl border-2 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 items-center bg-card p-3 md:p-4 rounded-2xl md:rounded-3xl border-2 shadow-sm">
         <div className="lg:col-span-6 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
           <Input 
             placeholder="Cari teks soal atau materi..." 
-            className="pl-12 h-12 rounded-2xl border-none bg-secondary/20 focus:bg-secondary/40 transition-colors" 
+            className="pl-11 md:pl-12 h-11 md:h-12 rounded-xl md:rounded-2xl border-none bg-secondary/20 focus:bg-secondary/40 transition-colors text-sm" 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
           />
         </div>
-        <div className="lg:col-span-3 flex items-center gap-2 px-4 border-l-2">
+        <div className="lg:col-span-3 flex items-center gap-2 px-2 md:px-4 border-l-0 md:border-l-2">
           <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
           <Select value={classFilter} onValueChange={setClassFilter}>
-            <SelectTrigger className="border-none shadow-none focus:ring-0 font-bold h-10">
+            <SelectTrigger className="border-none shadow-none focus:ring-0 font-bold h-10 text-xs md:text-sm">
               <SelectValue placeholder="Semua Kelas" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl">
@@ -316,10 +316,10 @@ export default function QuestionManagement() {
             </SelectContent>
           </Select>
         </div>
-        <div className="lg:col-span-3 flex items-center gap-2 px-4 border-l-2">
+        <div className="lg:col-span-3 flex items-center gap-2 px-2 md:px-4 border-l-0 md:border-l-2">
           <List className="h-4 w-4 text-muted-foreground shrink-0" />
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="border-none shadow-none focus:ring-0 font-bold h-10">
+            <SelectTrigger className="border-none shadow-none focus:ring-0 font-bold h-10 text-xs md:text-sm">
               <SelectValue placeholder="Semua Tipe" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl">
@@ -338,68 +338,68 @@ export default function QuestionManagement() {
           <p className="font-bold">Memuat bank soal...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {filteredQuestions.map((q) => (
-            <Card key={q.id} className="group shadow-lg hover:shadow-xl transition-all duration-300 border-none rounded-[2rem] overflow-hidden bg-card">
+            <Card key={q.id} className="group shadow-md md:shadow-lg hover:shadow-xl transition-all duration-300 border-none rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-card">
               <div className={cn(
-                "h-2 w-full", 
+                "h-1.5 md:h-2 w-full", 
                 q.type === 'multiple-choice' ? 'bg-primary' : q.type === 'number' ? 'bg-orange-500' : 'bg-emerald-500'
               )} />
-              <CardHeader className="pb-2 p-6">
+              <CardHeader className="pb-2 p-4 md:p-6">
                 <div className="flex justify-between items-start gap-2">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="font-bold rounded-lg px-2 py-0.5 border-primary/20 bg-primary/5 text-primary">
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="outline" className="font-bold rounded-lg px-2 py-0.5 border-primary/20 bg-primary/5 text-primary text-[10px]">
                       {classes?.find(c => c.id === q.classId)?.name || "Materi"}
                     </Badge>
                     <Badge className={cn(
                       "gap-1.5 rounded-lg px-2 py-0.5 text-white border-none",
                       q.type === 'multiple-choice' ? 'bg-primary' : q.type === 'number' ? 'bg-orange-500' : 'bg-emerald-500'
                     )}>
-                      {q.type === 'multiple-choice' ? <List className="h-3 w-3" /> : q.type === 'number' ? <Hash className="h-3 w-3" /> : <Type className="h-3 w-3" />}
-                      <span className="capitalize text-[10px] font-black tracking-wider">{(q.type || 'multiple-choice').replace('-', ' ')}</span>
+                      {q.type === 'multiple-choice' ? <List className="h-2.5 w-2.5" /> : q.type === 'number' ? <Hash className="h-2.5 w-2.5" /> : <Type className="h-2.5 w-2.5" />}
+                      <span className="capitalize text-[8px] md:text-[10px] font-black tracking-wider">{(q.type || 'multiple-choice').replace('-', ' ')}</span>
                     </Badge>
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/10" onClick={() => { setEditingQuestion(q); setFormData({ ...q }); setIsOpen(true); }}><Edit2 className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive rounded-xl hover:bg-destructive/10" onClick={() => handleDelete(q)}><Trash2 className="h-4 w-4" /></Button>
+                  <div className="flex gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 rounded-xl hover:bg-primary/10" onClick={() => { setEditingQuestion(q); setFormData({ ...q }); setIsOpen(true); }}><Edit2 className="h-3.5 w-3.5 md:h-4 md:w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 text-destructive rounded-xl hover:bg-destructive/10" onClick={() => handleDelete(q)}><Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" /></Button>
                   </div>
                 </div>
-                <CardTitle className="text-xl font-headline font-bold leading-tight mt-4 line-clamp-3">{q.statement || "Soal tanpa teks"}</CardTitle>
+                <CardTitle className="text-base md:text-xl font-headline font-bold leading-tight mt-3 md:mt-4 line-clamp-3">{q.statement || "Soal tanpa teks"}</CardTitle>
               </CardHeader>
-              <CardContent className="px-6 pb-8">
+              <CardContent className="px-4 md:px-6 pb-6 md:pb-8">
                  {q.type === 'multiple-choice' ? (
-                   <div className="space-y-2 mt-2">
+                   <div className="space-y-1.5 md:space-y-2 mt-2">
                       {q.options?.map((opt, idx) => (
                         <div key={idx} className={cn(
-                          "text-sm p-3 rounded-xl flex items-center gap-3 border-2 transition-colors", 
+                          "text-xs md:text-sm p-2.5 md:p-3 rounded-xl flex items-center gap-2 md:gap-3 border-2 transition-colors", 
                           idx === q.correctAnswerIndex ? "bg-primary/5 border-primary/20 text-primary font-bold" : "bg-secondary/20 border-transparent"
                         )}>
                           <div className={cn(
-                            "h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-black border-2",
+                            "h-5 w-5 md:h-6 md:w-6 rounded-lg flex items-center justify-center text-[8px] md:text-[10px] font-black border-2",
                             idx === q.correctAnswerIndex ? "bg-primary border-primary text-white" : "border-muted-foreground/30 text-muted-foreground"
                           )}>
                             {String.fromCharCode(65 + idx)}
                           </div> 
-                          {opt}
+                          <span className="truncate">{opt}</span>
                         </div>
                       ))}
                    </div>
                  ) : (
-                   <div className="mt-4 p-4 bg-secondary/20 rounded-2xl border-2 border-dashed border-muted-foreground/20 flex flex-col gap-2">
-                      <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Kunci Jawaban</span>
-                      <span className="font-headline font-black text-xl text-primary">{q.correctAnswer}</span>
+                   <div className="mt-3 md:mt-4 p-3 md:p-4 bg-secondary/20 rounded-xl md:rounded-2xl border-2 border-dashed border-muted-foreground/20 flex flex-col gap-1">
+                      <span className="text-[8px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest">Kunci Jawaban</span>
+                      <span className="font-headline font-black text-lg md:text-xl text-primary">{q.correctAnswer}</span>
                    </div>
                  )}
               </CardContent>
             </Card>
           ))}
           {filteredQuestions.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center py-32 text-muted-foreground bg-secondary/10 rounded-[3rem] border-2 border-dashed">
-              <div className="bg-muted p-4 rounded-full mb-4">
-                <Search className="h-10 w-10 opacity-20" />
+            <div className="col-span-full flex flex-col items-center justify-center py-20 md:py-32 text-muted-foreground bg-secondary/10 rounded-[2rem] md:rounded-[3rem] border-2 border-dashed">
+              <div className="bg-muted p-3 md:p-4 rounded-full mb-3 md:mb-4">
+                <Search className="h-8 w-8 md:h-10 md:w-10 opacity-20" />
               </div>
-              <p className="font-bold text-lg">Tidak ada soal ditemukan.</p>
-              <p className="text-sm">Coba sesuaikan filter atau pencarian Anda.</p>
+              <p className="font-bold text-base md:text-lg">Tidak ada soal ditemukan.</p>
+              <p className="text-xs md:text-sm">Coba sesuaikan filter atau pencarian Anda.</p>
             </div>
           )}
         </div>
