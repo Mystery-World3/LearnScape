@@ -43,9 +43,9 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background flex text-foreground">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row text-foreground">
       {/* Mobile Header (Hidden on Desktop) */}
-      <header className="md:hidden flex items-center justify-between p-4 border-b bg-card sticky top-0 z-50 w-full">
+      <header className="md:hidden flex items-center justify-between p-4 border-b bg-card sticky top-0 z-50 w-full shrink-0">
         <div className="flex items-center gap-2">
           <div className="bg-primary p-1.5 rounded-lg">
             <GraduationCap className="h-5 w-5 text-primary-foreground" />
@@ -76,7 +76,7 @@ export default function AdminLayout({
 
       {/* Main Content Area */}
       <main className="flex-1 bg-background/95 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 md:p-10 lg:p-12 pb-24">
+        <div className="max-w-7xl mx-auto p-4 md:p-10 lg:p-12 pb-24">
           {children}
         </div>
       </main>
