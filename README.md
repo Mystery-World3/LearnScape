@@ -10,7 +10,7 @@
 
 ## 🔗 Live Demo
 Coba aplikasinya langsung di sini:  
-**[https://math-quiz-five-green.vercel.app/](https://math-quiz-five-green.vercel.app/)**
+**[https://learn-scape-one.vercel.app/](https://learn-scape-one.vercel.app/)**
 
 ## 🚀 Fitur Utama
 
@@ -19,14 +19,14 @@ Coba aplikasinya langsung di sini:
 *   **Dashboard Statistik Real-time:** Visualisasi data performa siswa melalui grafik bar untuk memantau nilai rata-rata per materi secara instan.
 *   **Manajemen Nilai & Ekspor:** Rekapitulasi nilai siswa otomatis yang dapat diedit dan diekspor langsung ke format CSV untuk keperluan administrasi.
 *   **Mode Tema Solid:** Dukungan penuh untuk Mode Terang (*Light Mode*) dan Mode Gelap (*Dark Mode*) yang tersinkronisasi di seluruh halaman.
-*   **Animasi Interaktif:** Penggunaan animasi transisi yang halus untuk meningkatkan keterlibatan (*engagement*) siswa selama belajar.
+*   **Pintu Masuk Guru Tersembunyi:** Akses keamanan dashboard pengajar yang terintegrasi pada logo aplikasi untuk menjaga privasi dari siswa.
 
 ## 🛠️ Teknologi yang Digunakan
 
 *   **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS
 *   **UI Components:** Shadcn UI, Lucide React (Icons), Recharts (Statistik)
 *   **Backend & Database:** Firebase Firestore (Real-time Database)
-*   **Authentication:** Firebase Auth (Anonymous Sign-in untuk Guru/Siswa)
+*   **Authentication:** Firebase Auth (Anonymous Sign-in)
 *   **State Management:** React Hooks & LocalStorage Sync
 *   **Deployment:** Vercel
 
@@ -36,31 +36,23 @@ Jika Anda ingin menjalankan aplikasi ini di komputer sendiri:
 
 1.  **Clone repositori ini:**
     ```bash
-    git clone https://github.com/Mystery-World3/Math-Quiz.git
+    git clone https://github.com/Mystery-World3/LearnScape.git
     ```
 2.  **Masuk ke direktori proyek:**
     ```bash
-    cd Math-Quiz
+    cd LearnScape
     ```
 3.  **Instal dependensi:**
     ```bash
     npm install
     ```
 4.  **Konfigurasi Firebase:**
-    Buat file `.env.local` di akar proyek dan masukkan konfigurasi Firebase Anda:
-    ```env
-    NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-    NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-    ```
+    Buat file `.env.local` di akar proyek dan masukkan konfigurasi Firebase Anda.
 5.  **Jalankan aplikasi:**
     ```bash
     npm run dev
     ```
-    Buka [http://localhost:9002](http://localhost:9002) di browser Anda.
+    Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
 
 ## 🤝 Kontribusi
 
