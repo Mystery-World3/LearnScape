@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "learnscape",
+  "compatibility_date": "2026-11-04",
+  "compatibility_flags": ["nodejs_compat", "allow_eval_during_startup"],
+  "observability": {
+    "enabled": true
+  }
+}
